@@ -56,8 +56,17 @@ function getAuthErrorMessage(error: unknown): { title: string; message: string; 
         };
     }
 
-    // Non-Axios errors (file I/O, JSON parse, profile fetch, etc.)
+    // Invalid encryption key length (ENCRYPTION_KEY misconfigured)
     const errorMessage = error instanceof Error ? error.message : String(error);
+    if (errorMessage.includes('Invalid key length')) {
+        return {
+            title: 'Invalid Encryption Key',
+            message: 'The ENCRYPTION_KEY environment variable must be exactly 32 bytes (64 hex characters). Please check your configuration. See installation instructions: https://jjdenhertog.github.io/spotify-to-plex/installation.html',
+            details: { error: 'invalid_key_length', error_description: errorMessage }
+        };
+    }
+
+    // Non-Axios errors (file I/O, JSON parse, profile fetch, etc.)
     return {
         title: 'Authentication Failed',
         message: 'An unexpected error occurred during authentication. See the technical details below for more information.',
