@@ -5,7 +5,7 @@ FROM node:20-alpine AS node-builder
 # Don't set NODE_ENV=production during build, only set Docker-specific env vars
 ENV NEXT_DOCKER=1 \
     PNPM_HOME=/pnpm \
-    PATH=$PNPM_HOME:$PATH
+    PATH=/pnpm:$PATH
 
 # Install pnpm globally
 RUN corepack enable && corepack prepare pnpm@10.15.0 --activate
