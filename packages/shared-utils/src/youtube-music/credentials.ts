@@ -34,13 +34,18 @@ export function getDecryptedYouTubeMusicTokens(userId: string): DecryptedYouTube
         return undefined;
 
     try {
+        // ytmusicapi expects expires_at as Unix epoch in seconds.
+        // Legacy tokens stored expires_at in milliseconds; convert if needed.
+        const rawExpiresAt = user.expires_at;
+        const expiresAt = rawExpiresAt > 1e12 ? Math.floor(rawExpiresAt / 1000) : rawExpiresAt;
+
         return {
             access_token: decrypt(user.access_token.access_token),
             refresh_token: decrypt(user.access_token.refresh_token),
             expires_in: user.access_token.expires_in,
             token_type: user.access_token.token_type,
             scope: user.access_token.scope,
-            expires_at: user.expires_at
+            expires_at: expiresAt
         };
     } catch (error) {
         const message = error instanceof Error && error.message

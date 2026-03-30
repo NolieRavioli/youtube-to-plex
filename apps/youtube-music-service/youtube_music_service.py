@@ -23,6 +23,21 @@ class YouTubeMusicService:
         self.client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip()
         self.client_secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "").strip()
 
+    @staticmethod
+    def _normalize_expires(token: dict[str, Any]) -> tuple[int, int]:
+        """Return (expires_at_seconds, expires_in_seconds) from a token dict.
+
+        The JS side may store expires_at in milliseconds (Date.now() based).
+        ytmusicapi expects Unix epoch seconds, so convert when needed.
+        """
+        import time
+
+        raw_at = int(token.get("expires_at") or 0)
+        # Heuristic: values above 1e12 are clearly milliseconds
+        expires_at = raw_at // 1000 if raw_at > 1e12 else raw_at
+        expires_in = max(0, expires_at - int(time.time())) if expires_at else 0
+        return expires_at, expires_in
+
     def create_client(self, token: dict[str, Any] | None = None) -> YTMusic:
         if token and token.get("refresh_token"):
             if not self.client_id or not self.client_secret:
@@ -30,11 +45,13 @@ class YouTubeMusicService:
                     "GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET are required for authenticated YouTube Music requests."
                 )
 
+            expires_at, expires_in = self._normalize_expires(token)
+
             oauth_token = {
                 "access_token": token.get("access_token", ""),
                 "refresh_token": token["refresh_token"],
-                "expires_in": int(token.get("expires_in") or 0),
-                "expires_at": int(token.get("expires_at") or 0),
+                "expires_in": expires_in,
+                "expires_at": expires_at,
                 "token_type": token.get("token_type") or "Bearer",
                 "scope": token.get("scope") or OAUTH_SCOPE,
             }

@@ -205,7 +205,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                         token_type,
                         scope
                     },
-                    expires_at: Date.now() + (expires_in * 1000)
+                    expires_at: Math.floor(Date.now() / 1000) + expires_in
                 };
 
                 const mergedUsers = existingUsers

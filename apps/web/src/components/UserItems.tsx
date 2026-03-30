@@ -134,7 +134,7 @@ export default function UserItems(props: Props) {
 
 
         <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            Plex Server Connection
+            YouTube Music Library
             <IconButton onClick={handleCloseClick} size="small">
                 <Close />
             </IconButton>
