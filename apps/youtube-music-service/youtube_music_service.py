@@ -26,17 +26,24 @@ logger = logging.getLogger(__name__)
 # YouTube Data API v3
 YT_DATA_API = "https://www.googleapis.com/youtube/v3"
 
-# YouTube Music InnerTube API (used with TVHTML5 client for album browsing)
+# YouTube Music InnerTube API
 INNERTUBE_API = "https://music.youtube.com/youtubei/v1"
 
-TVHTML5_CONTEXT = {
+# IOS_MUSIC client — YouTube Music iOS app client.
+# Works with OAuth Bearer tokens and supports all FEmusic_* browse IDs.
+# (TVHTML5 v7 also accepts OAuth but is a regular-YouTube TV client and
+#  does not reliably support YouTube-Music-specific browse IDs.)
+IOS_MUSIC_CONTEXT = {
     "client": {
-        "clientName": "TVHTML5",
-        "clientVersion": "7.0",
+        "clientName": "IOS_MUSIC",
+        "clientVersion": "6.42",
         "hl": "en",
         "gl": "US",
     }
 }
+
+# User-Agent that matches the IOS_MUSIC client version above.
+IOS_MUSIC_UA = "com.google.ios.youtubemusic/6.42.1 (iPhone; iOS 18.0; Scale/3.00)"
 
 
 class YouTubeMusicService:
@@ -95,7 +102,15 @@ class YouTubeMusicService:
             headers={"Authorization": f"Bearer {access_token}"},
             timeout=30,
         )
-        resp.raise_for_status()
+        if not resp.ok:
+            try:
+                err_msg = resp.json().get("error", {}).get("message", "")
+            except Exception:
+                err_msg = ""
+            raise http_client.exceptions.HTTPError(
+                f"YouTube Data API HTTP {resp.status_code}: {err_msg or resp.text[:300]}",
+                response=resp,
+            )
         return resp.json()
 
     def _yt_api_get_all_pages(
@@ -122,7 +137,7 @@ class YouTubeMusicService:
     def _innertube_browse(self, browse_id: str, token: dict[str, Any]) -> dict[str, Any]:
         access_token = self._ensure_fresh_token(token)
         body = {
-            "context": TVHTML5_CONTEXT,
+            "context": IOS_MUSIC_CONTEXT,
             "browseId": browse_id,
         }
         resp = http_client.post(
@@ -131,10 +146,20 @@ class YouTubeMusicService:
             headers={
                 "Authorization": f"Bearer {access_token}",
                 "Content-Type": "application/json",
+                "User-Agent": IOS_MUSIC_UA,
+                "X-Goog-Api-Format-Version": "1",
             },
             timeout=30,
         )
-        resp.raise_for_status()
+        if not resp.ok:
+            try:
+                err_msg = resp.json().get("error", {}).get("message", "")
+            except Exception:
+                err_msg = ""
+            raise http_client.exceptions.HTTPError(
+                f"InnerTube browse HTTP {resp.status_code} for {browse_id}: {err_msg or resp.text[:300]}",
+                response=resp,
+            )
         return resp.json()
 
     # ------------------------------------------------------------------
@@ -259,6 +284,10 @@ class YouTubeMusicService:
                 "image": image,
                 "tracks": [],
             }
+        # For playlists, strip the "VL" browse-endpoint prefix so callers get
+        # a plain playlist ID (e.g. PLxxxx instead of VLPLxxxx).
+        if item_id.startswith("VL"):
+            item_id = item_id[2:]
         return {
             "type": "youtube-music-playlist",
             "id": item_id,
@@ -543,33 +572,18 @@ class YouTubeMusicService:
     # ------------------------------------------------------------------
 
     def get_library_playlists(self, token: dict[str, Any]) -> list[dict[str, Any]]:
-        """List user's playlists via YouTube Data API v3."""
-        raw_items = self._yt_api_get_all_pages(
-            "playlists",
-            {"mine": "true", "part": "snippet,contentDetails", "maxResults": "50"},
-            token,
-        )
-        return [
-            {
-                "type": "youtube-music-playlist",
-                "id": item["id"],
-                "title": item.get("snippet", {}).get("title", "Untitled Playlist"),
-                "image": self._pick_yt_thumbnail(item.get("snippet", {}).get("thumbnails", {})),
-                "owner": item.get("snippet", {}).get("channelTitle", "YouTube Music"),
-                "tracks": [],
-            }
-            for item in raw_items
-            if item.get("id")
-        ]
+        """List user's YouTube Music playlists via InnerTube IOS_MUSIC browse.
+
+        Uses InnerTube instead of the YouTube Data API v3 so the caller does not
+        need to enable the Data API in their Google Cloud project.
+        """
+        data = self._innertube_browse("FEmusic_liked_playlists", token)
+        return self._parse_innertube_library_items(data, item_type="playlist")
 
     def get_library_albums(self, token: dict[str, Any]) -> list[dict[str, Any]]:
-        """List user's saved albums via InnerTube TVHTML5 browse API."""
-        try:
-            data = self._innertube_browse("FEmusic_liked_albums", token)
-            return self._parse_innertube_library_items(data, item_type="album")
-        except Exception as exc:
-            logger.warning("InnerTube album browse failed (falling back to empty): %s", exc)
-            return []
+        """List user's saved albums via InnerTube IOS_MUSIC browse."""
+        data = self._innertube_browse("FEmusic_liked_albums", token)
+        return self._parse_innertube_library_items(data, item_type="album")
 
     def get_liked_songs_item(
         self,
