@@ -1,6 +1,31 @@
 # YouTube Music to Plex
 
-This project syncs YouTube Music playlists, liked songs, and saved albums into Plex. It keeps the existing Plex matching pipeline, optional Tidal/Lidarr/SLSKD integrations, and background sync worker, but the source provider is now YouTube Music only.
+## This is [@jjdenhertog](https://github.com/jjdenhertog)'s codebase we're all just living in it.
+
+[jjdenhertog/spotify-to-plex](https://github.com/jjdenhertog/spotify-to-plex)
+
+---
+
+<p align="center"><img src="docs/assets/images/logo.png" width="90"></p>
+<h1 align="center">Youtube to Plex</h1>
+
+<p align="center">
+  A web application to sync your YouTube Music playlists, liked songs, and saved albums with <a href="https://plex.tv/">Plex</a>. Automatically match songs, download missing tracks, and keep your music library in perfect sync. source provider is now YouTube Music only.
+</p>
+
+<p align="center">
+  <img src="docs/assets/images/app_overview.jpg" alt="Youtube to Plex Overview">
+</p>
+
+---
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## Support the original project
+
+[![Buy Me a Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/jjdenhertog)
 
 ## What It Does
 
