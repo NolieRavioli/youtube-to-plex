@@ -21,12 +21,12 @@ const syncOptions: SyncOption[] = [
     {
         type: 'albums',
         label: 'Albums',
-        description: 'Sync saved albums from Spotify to Plex'
+        description: 'Sync saved YouTube Music albums to Plex'
     },
     {
         type: 'playlists',
         label: 'Playlists',
-        description: 'Sync playlists from Spotify to Plex'
+        description: 'Sync YouTube Music playlists and liked songs to Plex'
     },
     {
         type: 'lidarr',

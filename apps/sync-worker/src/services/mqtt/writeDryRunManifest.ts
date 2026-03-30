@@ -1,6 +1,6 @@
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
 import { MQTTConfig, MQTTEntity, PublishedItem } from './types';
 
 type DryRunManifest = {

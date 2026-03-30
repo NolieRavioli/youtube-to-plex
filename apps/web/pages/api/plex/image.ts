@@ -1,9 +1,9 @@
-import { AxiosRequest } from '@spotify-to-plex/http-client/AxiosRequest';
+import { AxiosRequest } from '@youtube-to-plex/http-client/AxiosRequest';
 // MIGRATED: Updated to use http-client package
 import { generateError } from '@/helpers/errors/generateError';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
-import { getSettings } from '@spotify-to-plex/plex-config/functions/getSettings';
+import { getSettings } from '@youtube-to-plex/plex-config/functions/getSettings';
 
 export const config = {
     api: {

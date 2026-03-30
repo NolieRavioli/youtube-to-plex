@@ -1,6 +1,6 @@
 import { AxiosResponse } from "axios";
 import { Metadata } from "../types/plex/Metadata";
-import { AxiosRequest } from "@spotify-to-plex/http-client/AxiosRequest";
+import { AxiosRequest } from "@youtube-to-plex/http-client/AxiosRequest";
 import getAPIUrl from "../utils/getAPIUrl";
 
 type GetMetaDataResponse = {

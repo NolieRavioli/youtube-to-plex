@@ -1,6 +1,6 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { TrackLink } from '@spotify-to-plex/shared-types/common/track';
-import { getStorageDir } from "@spotify-to-plex/shared-utils/utils/getStorageDir";
+import { TrackLink } from '@youtube-to-plex/shared-types/common/track';
+import { getStorageDir } from "@youtube-to-plex/shared-utils/utils/getStorageDir";
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
@@ -11,8 +11,8 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
         async (req, res) => {
 
             const { type, tracks } = req.body;
-            if (type !== 'spotify' && type !== 'tidal')
-                throw new Error(`Invalid type: tidal or spotify expected`)
+            if (type !== 'youtube-music' && type !== 'tidal')
+                throw new Error(`Invalid type: tidal or youtube-music expected`)
 
             if (typeof tracks !== 'string')
                 throw new Error(`Tracks expected`)
@@ -42,7 +42,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
 
                     const trackLinks: TrackLink[] = JSON.parse(readFileSync(path, 'utf8'))
                     const tidalTracks = trackLinks
-                        .filter(item => trackIds.includes(item.spotify_id))
+                        .filter(item => trackIds.includes(item.source_id))
                         .map(item => item.tidal_id ? item.tidal_id[0] : null)
                         .filter(item => !!item)
 
@@ -52,11 +52,10 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                     break;
 
                 default:
-                case "spotify":
+                case "youtube-music":
                     res.send(trackIds.map(id => {
-                        const cleanId = id.replace('spotify:track:', '')
-
-                        return `https://open.spotify.com/track/${cleanId}`
+                        const cleanId = id.replace('ytmusic:track:', '')
+                        return `https://music.youtube.com/watch?v=${cleanId}`
 
                     }).join('\n'))
                     break;

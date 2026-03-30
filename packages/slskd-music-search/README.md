@@ -1,19 +1,19 @@
-# @spotify-to-plex/slskd-music-search
+# @youtube-to-plex/slskd-music-search
 
 Library to find tracks in Soulseek music library using SLSKD API.
 
 ## Installation
 
 ```bash
-npm install @spotify-to-plex/slskd-music-search
+npm install @youtube-to-plex/slskd-music-search
 ```
 
 ## Usage
 
 ```typescript
-import { newTrackSearch, searchAlbum, analyze } from '@spotify-to-plex/slskd-music-search/functions';
-import { createState } from '@spotify-to-plex/slskd-music-search/session/state';
-import type { SlskdCredentials } from '@spotify-to-plex/slskd-music-search';
+import { newTrackSearch, searchAlbum, analyze } from '@youtube-to-plex/slskd-music-search/functions';
+import { createState } from '@youtube-to-plex/slskd-music-search/session/state';
+import type { SlskdCredentials } from '@youtube-to-plex/slskd-music-search';
 
 // Create session state
 const credentials: SlskdCredentials = {

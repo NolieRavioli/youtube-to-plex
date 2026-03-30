@@ -7,7 +7,7 @@ import { updateMatchFilters } from './updateMatchFilters';
 import { updateTextProcessing } from './updateTextProcessing';
 import { updateSearchApproaches } from './updateSearchApproaches';
 import { getMusicSearchConfig } from './getMusicSearchConfig';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
 
 export async function resetToDefaults() {
 

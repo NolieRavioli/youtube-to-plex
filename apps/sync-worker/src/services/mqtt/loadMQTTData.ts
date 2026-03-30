@@ -1,16 +1,16 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
-import { SavedItem } from '@spotify-to-plex/shared-types/spotify/SavedItem';
-import { PlaylistData } from '@spotify-to-plex/shared-types/dashboard/PlaylistData';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
+import { SavedItem } from '@youtube-to-plex/shared-types/youtube-music/SavedItem';
+import { PlaylistData } from '@youtube-to-plex/shared-types/dashboard/PlaylistData';
 import { LoadedData, TrackLink } from './types';
 
 /**
- * Load spotify_saved_items.json
+ * Load ytmusic_saved_items.json
  */
 function loadSavedItems(): SavedItem[] {
     const storageDir = getStorageDir();
-    const filePath = join(storageDir, 'spotify_saved_items.json');
+    const filePath = join(storageDir, 'ytmusic_saved_items.json');
 
     if (!existsSync(filePath)) {
         throw new Error(`Required file not found: ${filePath}`);

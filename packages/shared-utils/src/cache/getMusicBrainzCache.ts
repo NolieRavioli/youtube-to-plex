@@ -3,7 +3,7 @@ import { join } from "node:path"
 import { getStorageDir } from "../utils/getStorageDir"
 
 type MusicBrainzAlbumCache = {
-    spotify_album_id: string;
+    source_album_id: string;
     musicbrainz_release_group_id: string;
     musicbrainz_artist_id: string;
     cached_at: number; // Unix timestamp
@@ -20,22 +20,22 @@ export function getMusicBrainzCache() {
         all = JSON.parse(readFileSync(path, 'utf8'))
 
     /**
-     * Get cached MusicBrainz data for a Spotify album
-     * @param spotifyAlbumId - The Spotify album ID to lookup
+     * Get cached MusicBrainz data for a source album
+     * @param sourceAlbumId - The source album ID to lookup
      * @returns The cached MusicBrainz data or undefined if not found
      */
-    const get = (spotifyAlbumId: string): MusicBrainzAlbumCache | undefined => {
-        return all.find(item => item.spotify_album_id === spotifyAlbumId)
+    const get = (sourceAlbumId: string): MusicBrainzAlbumCache | undefined => {
+        return all.find(item => item.source_album_id === sourceAlbumId)
     }
 
     /**
      * Add or update MusicBrainz cache entry
-     * Deduplicates by spotify_album_id
+     * Deduplicates by source_album_id
      * @param entry - The MusicBrainz cache entry to add/update
      */
     const add = (entry: Omit<MusicBrainzAlbumCache, 'cached_at'>) => {
         // Remove existing entry if present (deduplication)
-        all = all.filter(item => item.spotify_album_id !== entry.spotify_album_id)
+        all = all.filter(item => item.source_album_id !== entry.source_album_id)
 
         // Add new entry with timestamp
         const cacheEntry: MusicBrainzAlbumCache = {
@@ -51,17 +51,17 @@ export function getMusicBrainzCache() {
 
     /**
      * Add multiple MusicBrainz cache entries at once
-     * Deduplicates by spotify_album_id
+     * Deduplicates by source_album_id
      * @param entries - Array of MusicBrainz cache entries to add/update
      */
     const addBatch = (entries: Omit<MusicBrainzAlbumCache, 'cached_at'>[]) => {
         const timestamp = Date.now()
 
-        // Create a set of new spotify_album_ids for efficient deduplication
-        const newSpotifyIds = new Set(entries.map(e => e.spotify_album_id))
+        // Create a set of new source_album_ids for efficient deduplication
+        const newSourceIds = new Set(entries.map(e => e.source_album_id))
 
         // Remove existing entries that will be replaced
-        all = all.filter(item => !newSpotifyIds.has(item.spotify_album_id))
+        all = all.filter(item => !newSourceIds.has(item.source_album_id))
 
         // Add new entries with timestamp
         const cacheEntries: MusicBrainzAlbumCache[] = entries.map(entry => ({

@@ -1,12 +1,12 @@
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
-import { SavedItem } from "@spotify-to-plex/shared-types/spotify/SavedItem";
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
+import { SavedItem } from "@youtube-to-plex/shared-types/youtube-music/SavedItem";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 export function savedItemsHelpers() {
 
     // Get all saved items
-    const savedItemsPath = join(getStorageDir(), 'spotify_saved_items.json');
+    const savedItemsPath = join(getStorageDir(), 'ytmusic_saved_items.json');
 
     let items: SavedItem[] = []
     if (existsSync(savedItemsPath))

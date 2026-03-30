@@ -1,7 +1,7 @@
-import { AxiosRequest } from '@spotify-to-plex/http-client/AxiosRequest';
+import { AxiosRequest } from '@youtube-to-plex/http-client/AxiosRequest';
 import { handleOneRetryAttempt } from '../retry';
-import { getSettings } from '@spotify-to-plex/plex-config/functions/getSettings';
-import { getAPIUrl } from '@spotify-to-plex/shared-utils/utils/getAPIUrl';
+import { getSettings } from '@youtube-to-plex/plex-config/functions/getSettings';
+import { getAPIUrl } from '@youtube-to-plex/shared-utils/utils/getAPIUrl';
 
 export async function putPlaylistPoster(id: string, image: string) {
     let posters = await getPosters(id);

@@ -4,7 +4,7 @@ import { Alert, Box, Button, Chip, CircularProgress, Paper, Tab, Tabs, TextField
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { GetLogsResponse } from "../../pages/api/logs";
-import { SyncType } from "@spotify-to-plex/shared-types/common/sync";
+import { SyncType } from "@youtube-to-plex/shared-types/common/sync";
 import BMoment from "./BMoment";
 
 type TabPanelProps = {
@@ -337,9 +337,9 @@ export default function Logs() {
         if (!data) return null;
 
         const outputFiles = [
-            { title: 'Missing Tracks - Spotify', content: data.missing_files.missing_tracks_spotify },
+            { title: 'Missing Tracks - YouTube Music', content: data.missing_files.missing_tracks_youtube_music },
             { title: 'Missing Tracks - Tidal', content: data.missing_files.missing_tracks_tidal },
-            { title: 'Missing Albums - Spotify', content: data.missing_files.missing_albums_spotify },
+            { title: 'Missing Albums - YouTube Music', content: data.missing_files.missing_albums_youtube_music },
             { title: 'Missing Albums - Tidal', content: data.missing_files.missing_albums_tidal },
             { title: 'Missing Tracks - Lidarr (JSON)', content: data.missing_files.missing_tracks_lidarr },
             { title: 'Missing Albums - Lidarr (JSON)', content: data.missing_files.missing_albums_lidarr },

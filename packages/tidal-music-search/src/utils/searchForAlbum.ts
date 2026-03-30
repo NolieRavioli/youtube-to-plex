@@ -1,4 +1,4 @@
-import { compareTitles } from "@spotify-to-plex/music-search/utils/compareTitles";
+import { compareTitles } from "@youtube-to-plex/music-search/utils/compareTitles";
 import { searchAlbum } from "./tidal/searchAlbum";
 
 type FoundAlbumWithMatching = {

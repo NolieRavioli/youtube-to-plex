@@ -1,4 +1,4 @@
-import { SyncLog, SyncType } from "@spotify-to-plex/shared-types/common/sync";
+import { SyncLog, SyncType } from "@youtube-to-plex/shared-types/common/sync";
 import { getNestedSyncLogs } from "./getNestedSyncLogs";
 import { saveNestedSyncLogs } from "./saveNestedSyncLogs";
 

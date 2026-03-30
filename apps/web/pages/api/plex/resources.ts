@@ -1,5 +1,5 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getSettings } from '@spotify-to-plex/plex-config/functions/getSettings';
+import { getSettings } from '@youtube-to-plex/plex-config/functions/getSettings';
 import axios from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
@@ -28,7 +28,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
 
                 const result = await axios.get(`https://plex.tv/api/v2/resources`, {
                     params: {
-                        "X-Plex-Product": "Spotify to Plex",
+                        "X-Plex-Product": "YouTube Music to Plex",
                         "X-Plex-Client-Identifier": process.env.PLEX_APP_ID,
                         "X-Plex-Token": settings?.token,
                     }

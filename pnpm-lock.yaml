@@ -48,36 +48,33 @@ importers:
 
   apps/sync-worker:
     dependencies:
-      '@spotify-to-plex/http-client':
+      '@youtube-to-plex/http-client':
         specifier: workspace:*
         version: link:../../packages/http-client
-      '@spotify-to-plex/music-search':
+      '@youtube-to-plex/music-search':
         specifier: workspace:*
         version: link:../../packages/music-search
-      '@spotify-to-plex/plex-config':
+      '@youtube-to-plex/plex-config':
         specifier: workspace:*
         version: link:../../packages/plex-config
-      '@spotify-to-plex/plex-helpers':
+      '@youtube-to-plex/plex-helpers':
         specifier: workspace:*
         version: link:../../packages/plex-helpers
-      '@spotify-to-plex/plex-music-search':
+      '@youtube-to-plex/plex-music-search':
         specifier: workspace:*
         version: link:../../packages/plex-music-search
-      '@spotify-to-plex/shared-types':
+      '@youtube-to-plex/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
-      '@spotify-to-plex/shared-utils':
+      '@youtube-to-plex/shared-utils':
         specifier: workspace:*
         version: link:../../packages/shared-utils
-      '@spotify-to-plex/slskd-music-search':
+      '@youtube-to-plex/slskd-music-search':
         specifier: workspace:*
         version: link:../../packages/slskd-music-search
-      '@spotify-to-plex/tidal-music-search':
+      '@youtube-to-plex/tidal-music-search':
         specifier: workspace:*
         version: link:../../packages/tidal-music-search
-      '@spotify/web-api-ts-sdk':
-        specifier: ^1.2.0
-        version: 1.2.0
       axios:
         specifier: ^1.11.0
         version: 1.11.0
@@ -133,30 +130,27 @@ importers:
       '@mui/material':
         specifier: ^6.5.0
         version: 6.5.0(@emotion/react@11.14.0(@types/react@18.3.24)(react@18.3.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@18.3.24)(react@18.3.1))(@types/react@18.3.24)(react@18.3.1))(@types/react@18.3.24)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@spotify-to-plex/http-client':
+      '@youtube-to-plex/http-client':
         specifier: workspace:*
         version: link:../../packages/http-client
-      '@spotify-to-plex/plex-config':
+      '@youtube-to-plex/plex-config':
         specifier: workspace:*
         version: link:../../packages/plex-config
-      '@spotify-to-plex/plex-helpers':
+      '@youtube-to-plex/plex-helpers':
         specifier: workspace:*
         version: link:../../packages/plex-helpers
-      '@spotify-to-plex/plex-music-search':
+      '@youtube-to-plex/plex-music-search':
         specifier: workspace:*
         version: link:../../packages/plex-music-search
-      '@spotify-to-plex/shared-types':
+      '@youtube-to-plex/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
-      '@spotify-to-plex/shared-utils':
+      '@youtube-to-plex/shared-utils':
         specifier: workspace:*
         version: link:../../packages/shared-utils
-      '@spotify-to-plex/tidal-music-search':
+      '@youtube-to-plex/tidal-music-search':
         specifier: workspace:*
         version: link:../../packages/tidal-music-search
-      '@spotify/web-api-ts-sdk':
-        specifier: ^1.2.0
-        version: 1.2.0
       axios:
         specifier: ^1.11.0
         version: 1.11.0
@@ -222,10 +216,10 @@ importers:
 
   packages/music-search:
     dependencies:
-      '@spotify-to-plex/shared-types':
+      '@youtube-to-plex/shared-types':
         specifier: workspace:*
         version: link:../shared-types
-      '@spotify-to-plex/shared-utils':
+      '@youtube-to-plex/shared-utils':
         specifier: workspace:*
         version: link:../shared-utils
       fs-extra:
@@ -247,7 +241,7 @@ importers:
 
   packages/plex-config:
     dependencies:
-      '@spotify-to-plex/shared-utils':
+      '@youtube-to-plex/shared-utils':
         specifier: workspace:*
         version: link:../shared-utils
       fs-extra:
@@ -266,16 +260,16 @@ importers:
 
   packages/plex-helpers:
     dependencies:
-      '@spotify-to-plex/http-client':
+      '@youtube-to-plex/http-client':
         specifier: workspace:*
         version: link:../http-client
-      '@spotify-to-plex/plex-config':
+      '@youtube-to-plex/plex-config':
         specifier: workspace:*
         version: link:../plex-config
-      '@spotify-to-plex/shared-types':
+      '@youtube-to-plex/shared-types':
         specifier: workspace:*
         version: link:../shared-types
-      '@spotify-to-plex/shared-utils':
+      '@youtube-to-plex/shared-utils':
         specifier: workspace:*
         version: link:../shared-utils
       axios:
@@ -288,13 +282,13 @@ importers:
 
   packages/plex-music-search:
     dependencies:
-      '@spotify-to-plex/http-client':
+      '@youtube-to-plex/http-client':
         specifier: workspace:*
         version: link:../http-client
-      '@spotify-to-plex/music-search':
+      '@youtube-to-plex/music-search':
         specifier: workspace:*
         version: link:../music-search
-      '@spotify-to-plex/shared-types':
+      '@youtube-to-plex/shared-types':
         specifier: workspace:*
         version: link:../shared-types
     devDependencies:
@@ -313,12 +307,9 @@ importers:
 
   packages/shared-utils:
     dependencies:
-      '@spotify-to-plex/shared-types':
+      '@youtube-to-plex/shared-types':
         specifier: workspace:*
         version: link:../shared-types
-      '@spotify/web-api-ts-sdk':
-        specifier: ^1.2.0
-        version: 1.2.0
       axios:
         specifier: ^1.11.0
         version: 1.11.0
@@ -341,10 +332,10 @@ importers:
 
   packages/slskd-music-search:
     dependencies:
-      '@spotify-to-plex/music-search':
+      '@youtube-to-plex/music-search':
         specifier: workspace:*
         version: link:../music-search
-      '@spotify-to-plex/shared-types':
+      '@youtube-to-plex/shared-types':
         specifier: workspace:*
         version: link:../shared-types
       axios:
@@ -366,10 +357,10 @@ importers:
 
   packages/tidal-music-search:
     dependencies:
-      '@spotify-to-plex/music-search':
+      '@youtube-to-plex/music-search':
         specifier: workspace:*
         version: link:../music-search
-      '@spotify-to-plex/shared-types':
+      '@youtube-to-plex/shared-types':
         specifier: workspace:*
         version: link:../shared-types
       axios:
@@ -1212,9 +1203,6 @@ packages:
 
   '@popperjs/core@2.11.8':
     resolution: {integrity: sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==}
-
-  '@spotify/web-api-ts-sdk@1.2.0':
-    resolution: {integrity: sha512-JUaebva3Ohwo5I5tuTqyW/FKGOMbb40YevJMySAOINRxP7qQ/AMjBzfJx0zeO6yS+wAPfQSoGNsZaUggHw8vsA==}
 
   '@swc/core-darwin-arm64@1.13.4':
     resolution: {integrity: sha512-CGbTu9dGBwgklUj+NAQAYyPjBuoHaNRWK4QXJRv1QNIkhtE27aY7QA9uEON14SODxsio3t8+Pjjl2Mzx1Pxf+g==}
@@ -4617,8 +4605,6 @@ snapshots:
     optional: true
 
   '@popperjs/core@2.11.8': {}
-
-  '@spotify/web-api-ts-sdk@1.2.0': {}
 
   '@swc/core-darwin-arm64@1.13.4':
     optional: true

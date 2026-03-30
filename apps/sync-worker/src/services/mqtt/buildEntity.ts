@@ -1,4 +1,4 @@
-import { SavedItem } from '@spotify-to-plex/shared-types/spotify/SavedItem';
+import { SavedItem } from '@youtube-to-plex/shared-types/youtube-music/SavedItem';
 
 /**
  * Build MQTT entity from SavedItem and Plex data
@@ -9,8 +9,10 @@ export function buildEntity(savedItem: SavedItem, plexId: string, plexThumb: str
 
     // Determine icon based on type
     let icon = 'mdi:playlist-music';
-    if (savedItem.type === 'spotify-album') {
+    if (savedItem.type === 'youtube-music-album') {
         icon = 'mdi:album';
+    } else if (savedItem.type === 'youtube-music-liked') {
+        icon = 'mdi:heart';
     } else if (savedItem.type === 'plex-media') {
         icon = 'mdi:music-box-multiple';
     }

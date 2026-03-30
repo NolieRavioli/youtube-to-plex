@@ -1,6 +1,6 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getCachedTrackLinks } from '@spotify-to-plex/shared-utils/cache/getCachedTrackLink';
-import { Track } from '@spotify-to-plex/shared-types/spotify/Track';
+import { getCachedTrackLinks } from '@youtube-to-plex/shared-utils/cache/getCachedTrackLink';
+import { Track } from '@youtube-to-plex/shared-types/youtube-music/Track';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 
@@ -36,7 +36,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                     continue;
 
                 // Process if cached link has been found
-                const trackLink = cachedTrackLinks.find(item => item.spotify_id === searchItem.id)
+                const trackLink = cachedTrackLinks.find(item => item.source_id === searchItem.id)
                 const slskdFiles = trackLink?.slskd_files
                 if (!slskdFiles || slskdFiles.length === 0)
                     continue;

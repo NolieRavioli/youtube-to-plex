@@ -1,6 +1,6 @@
-import { search as musicSearch } from "@spotify-to-plex/music-search/functions/search";
-import { filterOutWords } from "@spotify-to-plex/music-search/utils/filterOutWords";
-import type { Track } from "@spotify-to-plex/music-search/types/Track";
+import { search as musicSearch } from "@youtube-to-plex/music-search/functions/search";
+import { filterOutWords } from "@youtube-to-plex/music-search/utils/filterOutWords";
+import type { Track } from "@youtube-to-plex/music-search/types/Track";
 import type { SlskdMusicSearchApproach } from "../types/SlskdMusicSearchApproach";
 import type { SlskdMusicSearchTrack } from "../types/SlskdMusicSearchTrack";
 import type { SearchQuery } from '../types/SearchQuery';

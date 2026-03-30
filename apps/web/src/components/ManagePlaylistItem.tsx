@@ -1,6 +1,5 @@
 import { errorBoundary } from "@/helpers/errors/errorBoundary"
-import { SavedItem } from "@spotify-to-plex/shared-types/spotify/SavedItem"
-// MIGRATED: Updated to use shared types package
+import { SavedItem } from "@youtube-to-plex/shared-types/youtube-music/SavedItem"
 import { Close, QueueMusic, Settings, Sync, SyncDisabled } from "@mui/icons-material"
 import { Box, IconButton, Paper, Tooltip, Typography } from "@mui/material"
 import axios from "axios"

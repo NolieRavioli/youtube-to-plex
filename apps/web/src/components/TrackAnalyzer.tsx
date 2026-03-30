@@ -1,11 +1,11 @@
 /* eslint-disable unicorn/consistent-destructuring */
 /* eslint-disable react/display-name */
 import { errorBoundary } from "@/helpers/errors/errorBoundary";
-import { GetSpotifyTrackByIdResponse } from "@/pages/api/spotify/tracks/[id]";
+import { GetYouTubeMusicTrackByIdResponse } from "@/pages/api/youtube-music/tracks/[id]";
 import { CheckCircle, Close, Block } from "@mui/icons-material";
 import { Box, CircularProgress, Divider, Typography } from "@mui/material";
-import type { PlexTrack } from "@spotify-to-plex/plex-music-search/types/PlexTrack";
-import type { SearchQuery, SearchResponse } from "@spotify-to-plex/plex-music-search/types/SearchResponse";
+import type { PlexTrack } from "@youtube-to-plex/plex-music-search/types/PlexTrack";
+import type { SearchQuery, SearchResponse } from "@youtube-to-plex/plex-music-search/types/SearchResponse";
 import axios from "axios";
 import { forwardRef, Fragment, useCallback, useImperativeHandle, useState } from "react";
 
@@ -17,7 +17,7 @@ const TrackAnalyzer = forwardRef<TrackAnalyzerHandles, unknown>((_props, ref) =>
 
     const [loading, setLoading] = useState(false)
     const [trackLoading, setTrackLoading] = useState(false)
-    const [track, setTrack] = useState<GetSpotifyTrackByIdResponse>()
+    const [track, setTrack] = useState<GetYouTubeMusicTrackByIdResponse>()
     const [searchResponse, setSearchResponse] = useState<SearchResponse & { allowedExtensions?: string[] }>()
 
     useImperativeHandle(ref, () => ({
@@ -35,8 +35,8 @@ const TrackAnalyzer = forwardRef<TrackAnalyzerHandles, unknown>((_props, ref) =>
             setTrack(undefined)
             setSearchResponse(undefined)
 
-            // First load the Spotify track data
-            const trackResult = await axios.get<GetSpotifyTrackByIdResponse>(`/api/spotify/tracks/${trackId}`)
+            // First load the YouTube Music track data
+            const trackResult = await axios.get<GetYouTubeMusicTrackByIdResponse>(`/api/youtube-music/tracks/${trackId}`)
             setTrack(trackResult.data)
             setTrackLoading(false)
 

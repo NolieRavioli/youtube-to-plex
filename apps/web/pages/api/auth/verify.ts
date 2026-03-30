@@ -1,7 +1,7 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getSettings } from '@spotify-to-plex/plex-config/functions/getSettings';
-import { updateSettings } from '@spotify-to-plex/plex-config/functions/updateSettings';
-import { GetPlexPinResponse } from '@spotify-to-plex/shared-types/plex/GetPlexPinResponse';
+import { getSettings } from '@youtube-to-plex/plex-config/functions/getSettings';
+import { updateSettings } from '@youtube-to-plex/plex-config/functions/updateSettings';
+import { GetPlexPinResponse } from '@youtube-to-plex/shared-types/plex/GetPlexPinResponse';
 import axios from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';

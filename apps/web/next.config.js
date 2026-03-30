@@ -22,14 +22,14 @@ module.exports = {
     
     // Transpile the workspace packages to handle TypeScript export type syntax
     transpilePackages: [
-        '@spotify-to-plex/plex-music-search',
-        '@spotify-to-plex/tidal-music-search',
-        '@spotify-to-plex/music-search',
-        '@spotify-to-plex/shared-types',
-        '@spotify-to-plex/shared-utils',
-        '@spotify-to-plex/http-client',
-        '@spotify-to-plex/plex-config',
-        '@spotify-to-plex/plex-helpers'
+        '@youtube-to-plex/plex-music-search',
+        '@youtube-to-plex/tidal-music-search',
+        '@youtube-to-plex/music-search',
+        '@youtube-to-plex/shared-types',
+        '@youtube-to-plex/shared-utils',
+        '@youtube-to-plex/http-client',
+        '@youtube-to-plex/plex-config',
+        '@youtube-to-plex/plex-helpers'
     ],
     
     async headers() {

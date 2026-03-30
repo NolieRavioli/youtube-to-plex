@@ -1,7 +1,7 @@
 import fs from 'fs-extra';
 const { ensureDir, writeFile } = fs;
 import { join } from 'node:path';
-import { MatchFilterConfig } from '@spotify-to-plex/shared-types/common/MatchFilterConfig';
+import { MatchFilterConfig } from '@youtube-to-plex/shared-types/common/MatchFilterConfig';
 
 const MATCH_FILTERS_FILE = 'match-filters.json';
 

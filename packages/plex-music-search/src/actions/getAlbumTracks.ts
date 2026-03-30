@@ -1,4 +1,4 @@
-import { removeFeaturing } from "@spotify-to-plex/music-search/utils/removeFeaturing";
+import { removeFeaturing } from "@youtube-to-plex/music-search/utils/removeFeaturing";
 import { HubSearchResult } from "../types/actions/HubSearchResult";
 import { Metadata } from "../types/plex/Metadata";
 import { getMetadata } from "./getMetadata";

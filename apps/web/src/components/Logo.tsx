@@ -15,7 +15,7 @@ export default function Logo() {
                     margin="0 auto">
                     <img src="/img/logo.png" alt="Logo" width={80} height={80} />
                 </Box>
-                <Typography sx={{ mb: 2 }} variant="body2">Spotify to Plex</Typography>
+                <Typography sx={{ mb: 2 }} variant="body2">YouTube Music to Plex</Typography>
             </Link>
         </Box>
     );

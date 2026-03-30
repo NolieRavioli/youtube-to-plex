@@ -5,29 +5,25 @@ nav_order: 3
 
 # Quick Start
 
-Get up and running with Spotify to Plex in just a few steps.
+Get up and running with YouTube Music to Plex in a few steps.
 
 ---
 
 ## Steps
 
-1. **Access the web interface** at `http://[your-ip]:9030`
-
-2. **Connect to Plex** using your Plex credentials
-
-3. **Add a playlist** by pasting a Spotify playlist URL
-
-4. **Let it match** - the app will automatically find matching songs in your Plex library
-
-5. **Review matches** - see which songs were found and how they were matched
-
-6. **Create/Update playlist** - sync the matched songs to a Plex playlist
+1. Open the web interface at `http://[your-ip]:9030`
+2. Connect to Plex
+3. Connect a Google account if you want private playlists, liked songs, or library albums
+4. Add a source by pasting a YouTube Music playlist URL or selecting items from a connected user
+5. Let the app match tracks against your Plex library
+6. Review the matches and warnings
+7. Create or update the destination Plex playlist
 
 ---
 
 ## Next Steps
 
-- [Configure Spotify authentication](spotify/) for user-specific features
-- Learn about [track matching](matching) and how to optimize it
+- [Configure Google OAuth](youtube-music/) for private YouTube Music access
+- Learn how [track matching](matching) works
 - Set up [automatic synchronization](synchronization)
-- Configure [integrations](integrations/) for missing track downloads
+- Configure optional [integrations](integrations/)

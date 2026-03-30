@@ -1,9 +1,7 @@
  
 import { errorBoundary } from "@/helpers/errors/errorBoundary";
-import { filterUnique } from "@spotify-to-plex/shared-utils/array/filterUnique";
-// MIGRATED: Updated to use shared utils package
-import { SavedItem } from "@spotify-to-plex/shared-types/spotify/SavedItem";
-// MIGRATED: Updated to use shared types package
+import { filterUnique } from "@youtube-to-plex/shared-utils/array/filterUnique";
+import { SavedItem } from "@youtube-to-plex/shared-types/youtube-music/SavedItem";
 import { Box, Button, CircularProgress, Divider, Paper, TextField, Typography } from "@mui/material";
 import Grid from '@mui/material/Grid2';
 import axios from "axios";
@@ -89,7 +87,7 @@ export default function ManagePlaylists() {
     ///////////////////////////////
     // Add Item
     ///////////////////////////////
-    const onChangeSpotifyInput = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const onChangeSourceInput = useCallback((e: ChangeEvent<HTMLInputElement>) => {
         setSearchInput(e.currentTarget.value)
     }, [])
 
@@ -136,7 +134,7 @@ export default function ManagePlaylists() {
                 <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'action.hover' }}>
                     <Box maxWidth={560} >
                         <Typography mb={.5} variant="body2">
-                            Add any existing Spotify Playlist or Album. Once added you can sync it with Plex or change settings for the automated synchronisation.
+                            Add YouTube Music playlists, YouTube playlists, albums, or liked songs. Once added you can sync them with Plex or change the automation settings.
                         </Typography>
                         <Divider sx={{ mt: 2, mb: 2 }} />
                         <Typography mb={1} variant="h6">
@@ -147,22 +145,25 @@ export default function ManagePlaylists() {
                         </Typography>
                         <Box component="ul" sx={{ mt: 1, mb: 2, pl: 2, fontSize: ".9em" }}>
                             <Box component="li" sx={{ mb: 0.5 }}>
-                                Spotify URL (e.g. https://open.spotify.com/playlist/37i9dQZF1EQqA6klNdJvwx )
+                                YouTube Music playlist URL (e.g. https://music.youtube.com/playlist?list=PL... )
                             </Box>
                             <Box component="li" sx={{ mb: 0.5 }}>
-                                Spotify URI (e.g. spotify:playlist:37i9dQZF1EQqA6klNdJvwx )
+                                YouTube playlist URL (e.g. https://www.youtube.com/playlist?list=PL... )
                             </Box>
                             <Box component="li" sx={{ mb: 0.5 }}>
-                                Liked songs using format <strong>{'{username}'}:liked</strong> (e.g. john_doe:liked), where username should be replaced with your connected Spotify username
+                                YouTube Music album URL (e.g. https://music.youtube.com/browse/MPRE... )
                             </Box>
-                            {/* <Box component="li">Plex Content id, for <Link href="https://github.com/jjdenhertog/spotify-to-plex/blob/main/README.md#dashboarding" target="_blank">dashboarding</Link> &#40;e.g. /library/metadata/12345 &#41;</Box> */}
+                            <Box component="li" sx={{ mb: 0.5 }}>
+                                Liked songs using <strong>liked</strong> when one user is connected, or <strong>{'{email}'}:liked</strong> when multiple users are connected
+                            </Box>
+                            {/* <Box component="li">Plex Content id, for <Link href="https://github.com/jjdenhertog/youtube-to-plex/blob/main/README.md#dashboarding" target="_blank">dashboarding</Link> &#40;e.g. /library/metadata/12345 &#41;</Box> */}
                         </Box>
                         <TextField
                             fullWidth
-                            placeholder="Enter your Spotify URL/URI or Plex ID here.."
+                            placeholder="Enter a YouTube Music URL or Plex ID here.."
                             disabled={generating}
                             value={searchInput}
-                            onChange={onChangeSpotifyInput}
+                            onChange={onChangeSourceInput}
                             variant="outlined"
                             size="small" />
                         <Box mt={1}>

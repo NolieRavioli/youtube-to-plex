@@ -1,21 +1,21 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getCachedTrackLinks } from '@spotify-to-plex/shared-utils/cache/getCachedTrackLink';
-import { search } from '@spotify-to-plex/plex-music-search/functions/search';
-import { searchAlbum } from '@spotify-to-plex/plex-music-search/functions/searchAlbum';
-import { PlexMusicSearchTrack } from '@spotify-to-plex/plex-music-search/types/PlexMusicSearchTrack';
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
+import { getCachedTrackLinks } from '@youtube-to-plex/shared-utils/cache/getCachedTrackLink';
+import { search } from '@youtube-to-plex/plex-music-search/functions/search';
+import { searchAlbum } from '@youtube-to-plex/plex-music-search/functions/searchAlbum';
+import { PlexMusicSearchTrack } from '@youtube-to-plex/plex-music-search/types/PlexMusicSearchTrack';
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
 
-import { SearchResponse } from '@spotify-to-plex/plex-music-search/types/SearchResponse';
+import { SearchResponse } from '@youtube-to-plex/plex-music-search/types/SearchResponse';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
-import { getSettings } from '@spotify-to-plex/plex-config/functions/getSettings';
+import { getSettings } from '@youtube-to-plex/plex-config/functions/getSettings';
 
 const router = createRouter<NextApiRequest, NextApiResponse>()
     .post(
         async (req, res) => {
             try {
                 const searchItems: PlexMusicSearchTrack[] = req.body.items;
-                const { type = 'spotify-playlist', fast = false, album } = req.body;
+                const { type = 'youtube-music-playlist', fast = false, album } = req.body;
 
                 if (!searchItems || searchItems.length === 0)
                     return res.status(400).json({ msg: "No items given" });
@@ -49,7 +49,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
 
                 let searchResult: SearchResponse[] = []
                 switch (type) {
-                    case "spotify-album":
+                    case "youtube-music-album":
                         searchResult = await searchAlbum(plexConfig, searchItems)
                         break;
 

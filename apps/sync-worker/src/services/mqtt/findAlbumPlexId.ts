@@ -1,11 +1,11 @@
 import { TrackLink } from './types';
 
 /**
- * Find Plex ID for an album by Spotify ID
+ * Find Plex ID for an album by source ID
  * Returns the first plex_id if available
  */
-export function findAlbumPlexId(spotifyId: string, trackLinks: TrackLink[]) {
-    const link = trackLinks.find(item => item.spotify_id === spotifyId);
+export function findAlbumPlexId(sourceId: string, trackLinks: TrackLink[]) {
+    const link = trackLinks.find(item => item.source_id === sourceId);
 
     if (!link?.plex_id || link.plex_id.length === 0) 
         return null;

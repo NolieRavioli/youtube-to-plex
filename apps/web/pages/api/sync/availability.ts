@@ -1,12 +1,11 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getLidarrSettings } from '@spotify-to-plex/plex-config/functions/getLidarrSettings';
-import { getSlskdSettings } from '@spotify-to-plex/plex-config/functions/getSlskdSettings';
-import { getStorageDir } from "@spotify-to-plex/shared-utils/utils/getStorageDir";
-import { SpotifyCredentials } from '@spotify-to-plex/shared-types/spotify/SpotifyCredentials';
+import { getLidarrSettings } from '@youtube-to-plex/plex-config/functions/getLidarrSettings';
+import { getSlskdSettings } from '@youtube-to-plex/plex-config/functions/getSlskdSettings';
+import { getYouTubeMusicUsersPath } from '@youtube-to-plex/shared-utils/youtube-music/storage';
+import { YouTubeMusicCredentials } from '@youtube-to-plex/shared-types/youtube-music/YouTubeMusicCredentials';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
 
 export type SyncAvailability = {
     users: boolean;
@@ -20,12 +19,12 @@ export type SyncAvailability = {
 const router = createRouter<NextApiRequest, NextApiResponse>()
     .get(async (_req, res) => {
         try {
-            // Check Users - at least one user with sync enabled
+            // User auto-discovery is intentionally disabled in the initial YouTube Music migration.
             let usersAvailable = false;
-            const credentialsPath = join(getStorageDir(), 'spotify.json');
+            const credentialsPath = getYouTubeMusicUsersPath();
             if (existsSync(credentialsPath)) {
-                const credentials: SpotifyCredentials[] = JSON.parse(readFileSync(credentialsPath, 'utf8'));
-                usersAvailable = credentials.some(c => c.user?.sync === true);
+                const credentials: YouTubeMusicCredentials[] = JSON.parse(readFileSync(credentialsPath, 'utf8'));
+                usersAvailable = credentials.some(c => c.user?.historySync === true);
             }
 
             // Check Lidarr - enabled in settings AND API key configured

@@ -1,11 +1,11 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getCachedTrackLinks } from '@spotify-to-plex/shared-utils/cache/getCachedTrackLink';
-import { Album } from '@spotify-to-plex/shared-types/spotify/Album';
-import { Track } from '@spotify-to-plex/shared-types/spotify/Track';
-import { search as slskdMusicSearch } from '@spotify-to-plex/slskd-music-search/functions/search';
-import { SearchResponse } from '@spotify-to-plex/slskd-music-search/types/SearchResponse';
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
-import { getSlskdSettings } from '@spotify-to-plex/plex-config/functions/getSlskdSettings';
+import { getCachedTrackLinks } from '@youtube-to-plex/shared-utils/cache/getCachedTrackLink';
+import { GetYouTubeMusicAlbum as Album } from '@youtube-to-plex/shared-types/youtube-music/GetYouTubeMusicAlbum';
+import { Track } from '@youtube-to-plex/shared-types/youtube-music/Track';
+import { search as slskdMusicSearch } from '@youtube-to-plex/slskd-music-search/functions/search';
+import { SearchResponse } from '@youtube-to-plex/slskd-music-search/types/SearchResponse';
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
+import { getSlskdSettings } from '@youtube-to-plex/plex-config/functions/getSlskdSettings';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 
@@ -70,7 +70,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
             //////////////////////////////////////
             let searchResult: SearchResponse[] = []
 
-            // Convert Spotify tracks to SLSKD search format
+            // Convert source tracks to SLSKD search format
             const slskdSearchItems = searchItems.map(track => ({
                 id: track.id,
                 artists: track.artists || [],

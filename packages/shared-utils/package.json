@@ -1,7 +1,7 @@
 {
-    "name": "@spotify-to-plex/shared-utils",
+    "name": "@youtube-to-plex/shared-utils",
     "version": "1.0.0",
-    "description": "Shared utility functions for Spotify-to-Plex applications",
+    "description": "Shared utility functions for YouTube Music to Plex applications",
     "exports": {
         "./*": {
             "types": "./dist/*.d.ts",
@@ -31,8 +31,7 @@
         "access": "restricted"
     },
     "dependencies": {
-        "@spotify-to-plex/shared-types": "workspace:*",
-        "@spotify/web-api-ts-sdk": "^1.2.0",
+        "@youtube-to-plex/shared-types": "workspace:*",
         "axios": "^1.11.0",
         "fs-extra": "^11.3.1",
         "string-similarity-js": "^2.1.4"

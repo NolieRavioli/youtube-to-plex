@@ -1,5 +1,5 @@
 {
-    "name": "@spotify-to-plex/tidal-music-search",
+    "name": "@youtube-to-plex/tidal-music-search",
     "version": "1.0.0",
     "description": "Library to find tracks in Tidal music library.",
     "keywords": [
@@ -33,8 +33,8 @@
         "node": ">=18.0.0"
     },
     "dependencies": {
-        "@spotify-to-plex/music-search": "workspace:*",
-        "@spotify-to-plex/shared-types": "workspace:*",
+        "@youtube-to-plex/music-search": "workspace:*",
+        "@youtube-to-plex/shared-types": "workspace:*",
         "axios": "^1.11.0",
         "qs": "^6.14.0"
     },

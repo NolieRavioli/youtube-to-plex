@@ -1,4 +1,4 @@
-import { removeFeaturing } from "@spotify-to-plex/music-search/utils/removeFeaturing";
+import { removeFeaturing } from "@youtube-to-plex/music-search/utils/removeFeaturing";
 import { getMetadata } from "../actions/getMetadata";
 import { PlexMusicSearchConfig } from "../types/PlexMusicSearchConfig";
 

@@ -1,7 +1,7 @@
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
-import { Track } from "@spotify-to-plex/shared-types/spotify/Track";
-import { searchAlbum } from "@spotify-to-plex/tidal-music-search/functions/searchAlbum";
-import { setCredentials } from "@spotify-to-plex/tidal-music-search/session/credentials";
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
+import { Track } from "@youtube-to-plex/shared-types/youtube-music/Track";
+import { searchAlbum } from "@youtube-to-plex/tidal-music-search/functions/searchAlbum";
+import { setCredentials } from "@youtube-to-plex/tidal-music-search/session/credentials";
 
 export async function findMissingTidalAlbums(missingTracks: Track[]) {
 

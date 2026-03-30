@@ -1,5 +1,5 @@
-import { MatchFilterConfig } from '@spotify-to-plex/shared-types/common/MatchFilterConfig';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
+import { MatchFilterConfig } from '@youtube-to-plex/shared-types/common/MatchFilterConfig';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
 import { join } from 'node:path';
 import { DEFAULT_MATCH_FILTERS } from '../config/default-config';
 import { readJSON } from './readJSON';

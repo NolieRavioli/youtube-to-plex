@@ -1,7 +1,7 @@
 import type { SlskdCredentials } from "../types/SlskdCredentials";
 import type { SlskdMusicSearchConfig } from "../types/SlskdMusicSearchConfig";
 import type { SlskdTrack } from "../types/SlskdTrack";
-import { setMusicSearchConfig as setGlobalMusicSearchConfig } from '@spotify-to-plex/music-search/functions/setMusicSearchConfig';
+import { setMusicSearchConfig as setGlobalMusicSearchConfig } from '@youtube-to-plex/music-search/functions/setMusicSearchConfig';
 
 type SlskdMusicSearchState = {
     credentials?: SlskdCredentials;

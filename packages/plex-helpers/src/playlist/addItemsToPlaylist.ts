@@ -1,10 +1,10 @@
-import { AxiosRequest } from '@spotify-to-plex/http-client/AxiosRequest';
+import { AxiosRequest } from '@youtube-to-plex/http-client/AxiosRequest';
 import { PlexSettings } from '../PlexSettings';
 import { PlaylistItem } from '../PlaylistItem';
 import { RetryConfig } from '../RetryConfig';
 import { validatePlexSettings } from '../utils/validatePlexSettings';
 import { getPlexUri } from '../utils/getPlexUri';
-import { getAPIUrl } from '@spotify-to-plex/shared-utils/utils/getAPIUrl';
+import { getAPIUrl } from '@youtube-to-plex/shared-utils/utils/getAPIUrl';
 
 /**
  * Adds items to a Plex playlist

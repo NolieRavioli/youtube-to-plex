@@ -1,9 +1,9 @@
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
-import { Track } from "@spotify-to-plex/shared-types/spotify/Track";
-import { getCachedTrackLinks } from "@spotify-to-plex/shared-utils/cache/getCachedTrackLink";
-import { SearchResponse } from "@spotify-to-plex/tidal-music-search/types/SearchResponse";
-import { search } from "@spotify-to-plex/tidal-music-search/functions/search";
-import { setCredentials } from "@spotify-to-plex/tidal-music-search/session/credentials";
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
+import { Track } from "@youtube-to-plex/shared-types/youtube-music/Track";
+import { getCachedTrackLinks } from "@youtube-to-plex/shared-utils/cache/getCachedTrackLink";
+import { SearchResponse } from "@youtube-to-plex/tidal-music-search/types/SearchResponse";
+import { search } from "@youtube-to-plex/tidal-music-search/functions/search";
+import { setCredentials } from "@youtube-to-plex/tidal-music-search/session/credentials";
 
 export async function findMissingTidalTracks(missingTracks: Track[]) {
 
@@ -23,7 +23,7 @@ export async function findMissingTidalTracks(missingTracks: Track[]) {
             continue;
 
         // Process if no cached link has been found
-        const trackLink = cachedTidalLinks.find(item => item.spotify_id == searchItem.id);
+        const trackLink = cachedTidalLinks.find(item => item.source_id == searchItem.id);
         const tidalIds = trackLink?.tidal_id;
         if (!tidalIds || tidalIds.length == 0)
             continue;

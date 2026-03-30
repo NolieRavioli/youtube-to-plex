@@ -1,5 +1,5 @@
 {
-    "name": "@spotify-to-plex/music-search",
+    "name": "@youtube-to-plex/music-search",
     "version": "1.0.0",
     "description": "Library to find tracks in a music library.",
     "keywords": [
@@ -32,8 +32,8 @@
         "node": ">=18.0.0"
     },
     "dependencies": {
-        "@spotify-to-plex/shared-types": "workspace:*",
-        "@spotify-to-plex/shared-utils": "workspace:*",
+        "@youtube-to-plex/shared-types": "workspace:*",
+        "@youtube-to-plex/shared-utils": "workspace:*",
         "fs-extra": "^11.3.1",
         "string-similarity-js": "^2.1.4"
     },

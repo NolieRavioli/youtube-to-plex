@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 import { generateError } from '@/helpers/errors/generateError';
-import { getMatchFilters } from '@spotify-to-plex/music-search/functions/getMatchFilters';
-import { updateMatchFilters } from '@spotify-to-plex/music-search/functions/updateMatchFilters';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
-import { MatchFilterConfig } from '@spotify-to-plex/shared-types/common/MatchFilterConfig';
+import { getMatchFilters } from '@youtube-to-plex/music-search/functions/getMatchFilters';
+import { updateMatchFilters } from '@youtube-to-plex/music-search/functions/updateMatchFilters';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
+import { MatchFilterConfig } from '@youtube-to-plex/shared-types/common/MatchFilterConfig';
 
 const router = createRouter<NextApiRequest, NextApiResponse>()
     .get(

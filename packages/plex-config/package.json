@@ -1,5 +1,5 @@
 {
-  "name": "@spotify-to-plex/plex-config",
+  "name": "@youtube-to-plex/plex-config",
   "version": "1.0.0",
   "description": "Shared Plex configuration management",
   "exports": {
@@ -25,7 +25,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@spotify-to-plex/shared-utils": "workspace:*",
+    "@youtube-to-plex/shared-utils": "workspace:*",
     "fs-extra": "^11.3.1"
   },
   "devDependencies": {

@@ -1,7 +1,7 @@
 {
-    "name": "@spotify-to-plex/shared-types",
+    "name": "@youtube-to-plex/shared-types",
     "version": "1.0.0",
-    "description": "Shared TypeScript type definitions for Spotify-to-Plex applications",
+    "description": "Shared TypeScript type definitions for YouTube Music to Plex applications",
     "exports": {
         "./*": {
             "types": "./dist/*.d.ts",

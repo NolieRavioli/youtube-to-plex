@@ -1,7 +1,7 @@
 import Logo from "@/components/Logo";
 import LidarrSettings from "@/components/LidarrSettings";
 import SlskdSettings from "@/components/SlskdSettings";
-import SpotifyNavigation from "@/components/SpotifyNavigation";
+import MusicNavigation from "@/components/MusicNavigation";
 import MainLayout from "@/layouts/MainLayout";
 import { Container, Paper, Typography } from '@mui/material';
 import { NextPage } from "next";
@@ -12,13 +12,13 @@ const Page: NextPage = () => {
         <>
             <Head>
                 <title>
-                    Settings - Spotify to Plex
+                    Settings - YouTube Music to Plex
                 </title>
             </Head>
             <MainLayout maxWidth="700px">
                 <Container>
                     <Logo />
-                    <SpotifyNavigation />
+                    <MusicNavigation />
                     <Paper elevation={0} sx={{ p: 2, bgcolor: 'action.hover' , mb:2}}>
                         <Typography variant="h4" sx={{ mt: 2, mb: 0.5 }}>
                             Settings

@@ -1,8 +1,8 @@
 /* eslint-disable max-depth */
-import { getSlskdSettings } from "@spotify-to-plex/plex-config/functions/getSlskdSettings";
-import { getStorageDir } from "@spotify-to-plex/shared-utils/utils/getStorageDir";
-import { SlskdSyncLog } from "@spotify-to-plex/shared-types/slskd/SlskdSyncLog";
-import { SlskdTrackData } from "@spotify-to-plex/shared-types/slskd/SlskdTrackData";
+import { getSlskdSettings } from "@youtube-to-plex/plex-config/functions/getSlskdSettings";
+import { getStorageDir } from "@youtube-to-plex/shared-utils/utils/getStorageDir";
+import { SlskdSyncLog } from "@youtube-to-plex/shared-types/slskd/SlskdSyncLog";
+import { SlskdTrackData } from "@youtube-to-plex/shared-types/slskd/SlskdTrackData";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { getNestedSyncLogsForType } from "../utils/getNestedSyncLogsForType";
@@ -12,10 +12,10 @@ import { completeSyncType } from "../utils/completeSyncType";
 import { errorSyncType } from "../utils/errorSyncType";
 import { updateSyncTypeProgress } from "../utils/updateSyncTypeProgress";
 
-import { newTrackSearch, setState, clearState, queueDownload } from "@spotify-to-plex/slskd-music-search";
-import type { SlskdMusicSearchConfig, SlskdTrack } from "@spotify-to-plex/slskd-music-search";
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
-import { setMusicSearchConfig as setMusicSearchMatchFilters } from "@spotify-to-plex/music-search/functions/setMusicSearchConfig";
+import { newTrackSearch, setState, clearState, queueDownload } from "@youtube-to-plex/slskd-music-search";
+import type { SlskdMusicSearchConfig, SlskdTrack } from "@youtube-to-plex/slskd-music-search";
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
+import { setMusicSearchConfig as setMusicSearchMatchFilters } from "@youtube-to-plex/music-search/functions/setMusicSearchConfig";
 
 export async function syncSlskd() {
     console.log('Starting SLSKD sync...');

@@ -1,6 +1,6 @@
 /* eslint-disable custom/jsx-single-line-props */
-import type { SearchResponse } from "@spotify-to-plex/plex-music-search/types/SearchResponse";
-import type { PlexTrack } from "@spotify-to-plex/plex-music-search/types/PlexTrack";
+import type { SearchResponse } from "@youtube-to-plex/plex-music-search/types/SearchResponse";
+import type { PlexTrack } from "@youtube-to-plex/plex-music-search/types/PlexTrack";
 import { Check, LibraryMusicSharp, Warning } from "@mui/icons-material";
 import { Box, CircularProgress, Divider, FormControlLabel, IconButton, ListItem, Paper, Radio, RadioGroup, Tooltip, Typography } from "@mui/material";
 import { ChangeEvent, useCallback, useMemo, useState } from "react";
@@ -78,7 +78,7 @@ export default function PlexTrack(props: Props) {
     ////////////////////////////////////
     const onNotPerfectMatchClick = useCallback(() => {
         // Save track ID to localStorage for the test page to pick up
-        localStorage.setItem('spotify-test-track-id', id);
+        localStorage.setItem('youtube-music-test-track-id', id);
         // Navigate to test page in new tab
         const url = `/advanced/music-search-config/test`;
         window.open(url, '_blank');

@@ -1,5 +1,5 @@
-import { search } from "@spotify-to-plex/music-search/functions/search";
-import { Track } from "@spotify-to-plex/music-search/types/Track";
+import { search } from "@youtube-to-plex/music-search/functions/search";
+import { Track } from "@youtube-to-plex/music-search/types/Track";
 import getAlbumTracks from "../actions/getAlbumTracks";
 import { PlexMusicSearchConfig } from "../types/PlexMusicSearchConfig";
 import { PlexMusicSearchTrack } from "../types/PlexMusicSearchTrack";

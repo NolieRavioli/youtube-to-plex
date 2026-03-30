@@ -1,6 +1,6 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getSlskdSettings } from '@spotify-to-plex/plex-config/functions/getSlskdSettings';
-import { queueDownload, type SlskdDownloadFile } from '@spotify-to-plex/slskd-music-search/actions/queueDownload';
+import { getSlskdSettings } from '@youtube-to-plex/plex-config/functions/getSlskdSettings';
+import { queueDownload, type SlskdDownloadFile } from '@youtube-to-plex/slskd-music-search/actions/queueDownload';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 

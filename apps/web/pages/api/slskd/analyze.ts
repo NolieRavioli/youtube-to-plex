@@ -1,8 +1,8 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { analyze } from '@spotify-to-plex/slskd-music-search/functions/analyze';
-import { SlskdMusicSearchTrack } from '@spotify-to-plex/slskd-music-search/types/SlskdMusicSearchTrack';
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
-import { getSlskdSettings } from '@spotify-to-plex/plex-config/functions/getSlskdSettings';
+import { analyze } from '@youtube-to-plex/slskd-music-search/functions/analyze';
+import { SlskdMusicSearchTrack } from '@youtube-to-plex/slskd-music-search/types/SlskdMusicSearchTrack';
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
+import { getSlskdSettings } from '@youtube-to-plex/plex-config/functions/getSlskdSettings';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 

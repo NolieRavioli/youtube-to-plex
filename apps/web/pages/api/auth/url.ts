@@ -1,6 +1,6 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { updateSettings } from '@spotify-to-plex/plex-config/functions/updateSettings';
-import { PostPinResponse } from '@spotify-to-plex/shared-types/plex/PostPinResponse';
+import { updateSettings } from '@youtube-to-plex/plex-config/functions/updateSettings';
+import { PostPinResponse } from '@youtube-to-plex/shared-types/plex/PostPinResponse';
 import axios from 'axios';
 
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -17,7 +17,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
             try {
                 const result = await axios.post<PostPinResponse>("https://plex.tv/api/v2/pins", stringify({
                     strong: true,
-                    "X-Plex-Product": "Spotify to Plex",
+                    "X-Plex-Product": "YouTube Music to Plex",
                     "X-Plex-Client-Identifier": process.env.PLEX_APP_ID,
                 }))
 
@@ -28,7 +28,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                         forwardUrl: `${req.body.callback}?plex=1`,
                         context: {
                             device: {
-                                product: 'Spotify to Plex',
+                                product: 'YouTube Music to Plex',
                             },
                         },
                     })}`;

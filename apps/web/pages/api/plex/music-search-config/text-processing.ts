@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 import { generateError } from '@/helpers/errors/generateError';
-import { getTextProcessing } from '@spotify-to-plex/music-search/functions/getTextProcessing';
-import { updateTextProcessing } from '@spotify-to-plex/music-search/functions/updateTextProcessing';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
-import { validateTextProcessing } from '@spotify-to-plex/music-search/validation/validateTextProcessing';
+import { getTextProcessing } from '@youtube-to-plex/music-search/functions/getTextProcessing';
+import { updateTextProcessing } from '@youtube-to-plex/music-search/functions/updateTextProcessing';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
+import { validateTextProcessing } from '@youtube-to-plex/music-search/validation/validateTextProcessing';
 
 const router = createRouter<NextApiRequest, NextApiResponse>()
     .get(

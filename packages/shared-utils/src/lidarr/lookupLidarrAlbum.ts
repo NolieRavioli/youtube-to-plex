@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { LidarrLookupResult } from '@spotify-to-plex/shared-types/musicbrainz/LidarrLookupResult';
+import type { LidarrLookupResult } from '@youtube-to-plex/shared-types/musicbrainz/LidarrLookupResult';
 import { withRetry } from './utils/withRetry';
 
 /**

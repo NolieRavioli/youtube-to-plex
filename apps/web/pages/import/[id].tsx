@@ -2,10 +2,9 @@ import Logo from "@/components/Logo";
 import PlexPlaylist from "@/components/PlexPlaylist";
 import { errorBoundary } from "@/helpers/errors/errorBoundary";
 import MainLayout from "@/layouts/MainLayout";
-import { GetSpotifyAlbum } from "@spotify-to-plex/shared-types/spotify/GetSpotifyAlbum";
-import { GetSpotifyPlaylist } from "@spotify-to-plex/shared-types/spotify/GetSpotifyPlaylist";
-import { SavedItem } from "@spotify-to-plex/shared-types/spotify/SavedItem";
-// MIGRATED: Updated to use shared types package
+import { GetYouTubeMusicAlbum } from "@youtube-to-plex/shared-types/youtube-music/GetYouTubeMusicAlbum";
+import { GetYouTubeMusicPlaylist } from "@youtube-to-plex/shared-types/youtube-music/GetYouTubeMusicPlaylist";
+import { SavedItem } from "@youtube-to-plex/shared-types/youtube-music/SavedItem";
 import { ChevronLeft } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import axios from "axios";
@@ -16,7 +15,7 @@ import { useCallback, useEffect, useState } from "react";
 
 const Page: NextPage = () => {
     const [loading, setLoading] = useState(true);
-    const [playlist, setPlaylist] = useState<GetSpotifyAlbum | GetSpotifyPlaylist>()
+    const [playlist, setPlaylist] = useState<GetYouTubeMusicAlbum | GetYouTubeMusicPlaylist>()
     const [fast, setFast] = useState(false)
     const [showOptimizer, setShowOptimizer] = useState(false)
     const router = useRouter();
@@ -30,7 +29,7 @@ const Page: NextPage = () => {
             if (typeof router.query.id !== 'string')
                 throw new Error(`ID expected.`)
 
-            const result = await axios.get<GetSpotifyAlbum | GetSpotifyPlaylist>(`/api/spotify/items/${router.query.id}?full=1`)
+            const result = await axios.get<GetYouTubeMusicAlbum | GetYouTubeMusicPlaylist>(`/api/youtube-music/items/${router.query.id}?full=1`)
             if (result.data.tracks.length > 100)
                 setShowOptimizer(true)
 
@@ -61,7 +60,7 @@ const Page: NextPage = () => {
 
     return (<>
         <Head>
-            <title>Spotify to Plex</title>
+            <title>YouTube Music to Plex</title>
         </Head>
         <MainLayout maxWidth="700px">
             <Container>
@@ -70,7 +69,7 @@ const Page: NextPage = () => {
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, maxWidth: 300, border: '2px solid rgba(255,255,255,0.5)', borderRadius: '4px', p: 2, textAlign: 'center' }}>
                         <CircularProgress size={20} />
                         <Typography variant="body1">
-                            Loading Spotify data...
+                            Loading YouTube Music data...
                         </Typography>
                     </Box>
                 </Box>}

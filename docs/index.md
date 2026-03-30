@@ -4,59 +4,57 @@ layout: home
 nav_order: 1
 ---
 
-# Spotify to Plex
+# YouTube Music to Plex
 
-A web application to sync your Spotify playlists with [Plex](https://plex.tv/). Automatically match songs, download missing tracks, and keep your music library in perfect sync.
+A web application to sync your YouTube Music playlists, liked songs, and saved albums with [Plex](https://plex.tv/). It keeps the Plex matching pipeline, optional downloader integrations, and background sync worker, but the source provider is now YouTube Music only.
 
-![Spotify to Plex Overview](assets/images/app_overview.jpg)
+![YouTube Music to Plex Overview](assets/images/app_overview.jpg)
 
 ---
 
 ## Key Features
 
-### Comprehensive Spotify Sync
-Synchronize **any** Spotify playlist with Plex, including:
-- Spotify-owned playlists (Spotify Song mixes)
-- Liked songs and albums
-- Personal, private, and collaborative playlists
-- Recently played tracks and Daylist
+### YouTube Music Sources
+Synchronize the parts of your YouTube Music library that matter:
+- Public or private YouTube Music playlists
+- YouTube playlists when supported by the service
+- Liked songs
+- Library albums and connected-user playlists
 
 ### Extensive Track Matching
-Advanced matching algorithms that find your songs across different formats:
+Advanced matching algorithms find your songs across different formats:
 - Multiple search strategies with customizable approaches
-- Fuzzy matching for remixes, live versions, and alternative recordings
+- Fuzzy matching for remixes, live versions, and noisy video titles
 - Real-time match quality indicators
 
-### Automatic Missing Track Downloads
-Never miss a song from your playlists:
-- [Lidarr](https://github.com/Lidarr/Lidarr) integration for complete albums
-- [SLSKD](https://github.com/slskd/slskd) integration for P2P downloads
-- [Tidal](https://tidal.com/) matching for finding alternatives
+### Automatic Missing Track Workflows
+Never lose track of what Plex could not match:
+- [Lidarr](integrations/lidarr) integration for album downloads
+- [SLSKD](integrations/slskd) integration for peer-to-peer downloads
+- [Tidal](integrations/tidal) matching for alternative availability checks
 
-### Smart Synchronization
-Set it and forget it with automatic playlist syncing:
-- Scheduled synchronization with customizable intervals
-- Multiple Spotify user support
-- Smart caching for faster subsequent syncs
+### Background Sync
+Keep saved items in sync with Plex:
+- Scheduled synchronization with configurable intervals
+- Multiple Google account support
+- Cached matching for faster repeat syncs
 
 ---
 
 ## Getting Started
 
-1. [Install](installation) the application using Docker
+1. [Install](installation) the application with Docker
 2. Follow the [Quick Start](quick-start) guide
-3. [Configure Spotify](spotify/) authentication
-
+3. [Configure Google OAuth](youtube-music/) for YouTube Music access
 
 ---
 
-## Why Spotify to Plex?
+## Current Scope
 
-This project started because I'm using Home Assistant together with Plex and Sonos. During the week I'm listening to Spotify but in the evenings and weekends Plex is more often used. Using this application I can automatically synchronize my Spotify songs with my Plex setup.
+This migration focuses on explicit playlist, liked-song, and album imports.
 
-**What makes this different:**
-- Web interface with detailed match information
-- Works with Spotify-owned playlists that other tools can't access
-- Multiple download integrations (Lidarr, SLSKD, Tidal)
-- Multiple Spotify user support
-- Complete transparency in how songs are matched
+**The current direction:**
+- YouTube Music is the only source provider
+- The Python service owns YouTube Music loading through `ytmusicapi`
+- The Plex-side matching pipeline stays reusable
+- Recent-playback context discovery is intentionally not part of phase 1

@@ -1,6 +1,6 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
-import { SyncTypeLogCollection, SyncLogCollection } from '@spotify-to-plex/shared-types/common/sync';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
+import { SyncTypeLogCollection, SyncLogCollection } from '@youtube-to-plex/shared-types/common/sync';
 import { readFileSync, existsSync, unlinkSync } from 'node:fs';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
@@ -12,9 +12,9 @@ export type GetLogsResponse = {
     lidarr_sync_log: Record<string, any>;
     slskd_sync_log: Record<string, any>;
     missing_files: {
-        missing_tracks_spotify: string;
+        missing_tracks_youtube_music: string;
         missing_tracks_tidal: string;
-        missing_albums_spotify: string;
+        missing_albums_youtube_music: string;
         missing_albums_tidal: string;
         missing_tracks_lidarr: string;
         missing_albums_lidarr: string;
@@ -129,9 +129,9 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                     lidarr_sync_log: lidarrSyncLog,
                     slskd_sync_log: slskdSyncLog,
                     missing_files: {
-                        missing_tracks_spotify: readMissingFile('missing_tracks_spotify.txt'),
+                        missing_tracks_youtube_music: readMissingFile('missing_tracks_youtube_music.txt'),
                         missing_tracks_tidal: readMissingFile('missing_tracks_tidal.txt'),
-                        missing_albums_spotify: readMissingFile('missing_albums_spotify.txt'),
+                        missing_albums_youtube_music: readMissingFile('missing_albums_youtube_music.txt'),
                         missing_albums_tidal: readMissingFile('missing_albums_tidal.txt'),
                         missing_tracks_lidarr: readMissingJsonFile('missing_tracks_lidarr.json'),
                         missing_albums_lidarr: readMissingJsonFile('missing_albums_lidarr.json'),

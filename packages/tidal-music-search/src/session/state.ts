@@ -1,7 +1,7 @@
 import { TidalMusicSearchConfig } from "../types/TidalMusicSearchConfig";
 import { TidalTrack } from "../types/TidalTrack";
-import { setMusicSearchConfig as setGlobalMusicSearchConfig } from "@spotify-to-plex/music-search/functions/setMusicSearchConfig";
-import { setConfig as setGlobalConfig } from "@spotify-to-plex/music-search/functions/setConfig";
+import { setMusicSearchConfig as setGlobalMusicSearchConfig } from "@youtube-to-plex/music-search/functions/setMusicSearchConfig";
+import { setConfig as setGlobalConfig } from "@youtube-to-plex/music-search/functions/setConfig";
 
 type TidalMusicSearchState = {
     config?: TidalMusicSearchConfig;

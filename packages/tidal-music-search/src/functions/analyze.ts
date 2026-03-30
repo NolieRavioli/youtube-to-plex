@@ -1,4 +1,4 @@
-import { setConfig } from "@spotify-to-plex/music-search/functions/setConfig";
+import { setConfig } from "@youtube-to-plex/music-search/functions/setConfig";
 import { setCredentials, authenticate } from "../session/credentials";
 import { TidalMusicSearchConfig } from "../types/TidalMusicSearchConfig";
 import { TidalMusicSearchTrack } from "../types/TidalMusicSearchTrack";

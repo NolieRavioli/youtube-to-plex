@@ -2,7 +2,7 @@
 /* eslint-disable max-lines */
 import { errorBoundary } from "@/helpers/errors/errorBoundary";
 import { GetTidalTracksResponse } from "@/pages/api/tidal";
-import { Track } from "@spotify-to-plex/shared-types/spotify/Track";
+import { Track } from "@youtube-to-plex/shared-types/youtube-music/Track";
 import CloseIcon from '@mui/icons-material/Close';
 import { Alert, Box, Button, CircularProgress, Dialog, Divider, IconButton, Typography } from "@mui/material";
 import axios from "axios";
@@ -128,7 +128,7 @@ export default function ExportMissingTracks(props: Props) {
             abortController.current = new AbortController()
 
             switch (type) {
-                case "spotify-album":
+                case "youtube-music-album":
 
                     const { id, title } = playlist;
                     const result = await axios.post<GetTidalTracksResponse[]>('/api/tidal', {
@@ -144,7 +144,8 @@ export default function ExportMissingTracks(props: Props) {
                     setTracksLoaded(prev => [...prev, ...tracks.map(item => item.id)])
 
                     break;
-                case "spotify-playlist":
+                case "youtube-music-playlist":
+                case "youtube-music-liked":
                     await loadTidalTracks(missingTidalTracks)
                     break;
             }
@@ -202,7 +203,7 @@ export default function ExportMissingTracks(props: Props) {
 
     // Extract unique albums for Lidarr
     const uniqueAlbums = useMemo(() => {
-        const albumMap = new Map<string, { artist_name: string; album_name: string; spotify_album_id: string }>();
+        const albumMap = new Map<string, { artist_name: string; album_name: string; source_album_id: string }>();
 
         tracks.forEach(track => {
             // Skip tracks without valid album_id
@@ -219,7 +220,7 @@ export default function ExportMissingTracks(props: Props) {
                 albumMap.set(key, {
                     artist_name: artist,
                     album_name: album,
-                    spotify_album_id: track.album_id
+                    source_album_id: track.album_id
                 });
             }
         });
@@ -298,10 +299,10 @@ export default function ExportMissingTracks(props: Props) {
                             {!!(tracks.length > 0) &&
                                 <>
                                     <form method="POST" action="/api/download" target="_blank" >
-                                        <input type="hidden" name="type" value="spotify" />
+                                        <input type="hidden" name="type" value="youtube-music" />
                                         <input type="hidden" name="tracks" value={tracks.map(item => item.id)} />
                                         <Button variant="outlined" type="submit">
-                                            Download Spotify links
+                                            Download YouTube Music links
                                         </Button>
                                     </form>
                                     {!!((missingTidalTracks.length > 0) && !hasLoadedTidalTracks) &&

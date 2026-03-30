@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { MusicBrainzTextSearchResponse } from '@spotify-to-plex/shared-types/musicbrainz/MusicBrainzTextSearchResponse';
+import { MusicBrainzTextSearchResponse } from '@youtube-to-plex/shared-types/musicbrainz/MusicBrainzTextSearchResponse';
 import { rateLimitDelay } from './utils/rateLimitDelay';
 import { withRetry } from './utils/withRetry';
 import { validateMusicBrainzMatch } from './validateMusicBrainzMatch';

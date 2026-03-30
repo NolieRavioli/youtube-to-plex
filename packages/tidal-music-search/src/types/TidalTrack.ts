@@ -1,4 +1,4 @@
-import { Track } from "@spotify-to-plex/music-search/types/Track";
+import { Track } from "@youtube-to-plex/music-search/types/Track";
 
 export type TidalTrack = {
     id: string;

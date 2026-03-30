@@ -1,5 +1,5 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getSettings } from '@spotify-to-plex/plex-config/functions/getSettings';
+import { getSettings } from '@youtube-to-plex/plex-config/functions/getSettings';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 

@@ -1,12 +1,12 @@
-import { getCachedTrackLinks } from "@spotify-to-plex/shared-utils/cache/getCachedTrackLink";
-import { GetSpotifyAlbum } from "@spotify-to-plex/shared-types/spotify/GetSpotifyAlbum";
-import { GetSpotifyPlaylist } from "@spotify-to-plex/shared-types/spotify/GetSpotifyPlaylist";
-import { PlexTrack } from "@spotify-to-plex/plex-music-search/types/PlexTrack";
-import { SearchResponse } from "@spotify-to-plex/plex-music-search/types/SearchResponse";
-import { getById } from "@spotify-to-plex/plex-music-search/functions/getById";
-import { PlexMusicSearchConfig } from "@spotify-to-plex/plex-music-search/types/PlexMusicSearchConfig";
+import { getCachedTrackLinks } from "@youtube-to-plex/shared-utils/cache/getCachedTrackLink";
+import { GetYouTubeMusicAlbum } from "@youtube-to-plex/shared-types/youtube-music/GetYouTubeMusicAlbum";
+import { GetYouTubeMusicPlaylist } from "@youtube-to-plex/shared-types/youtube-music/GetYouTubeMusicPlaylist";
+import { PlexTrack } from "@youtube-to-plex/plex-music-search/types/PlexTrack";
+import { SearchResponse } from "@youtube-to-plex/plex-music-search/types/SearchResponse";
+import { getById } from "@youtube-to-plex/plex-music-search/functions/getById";
+import { PlexMusicSearchConfig } from "@youtube-to-plex/plex-music-search/types/PlexMusicSearchConfig";
 
-export async function getCachedPlexTracks(plexSearchConfig: PlexMusicSearchConfig, data: GetSpotifyPlaylist | GetSpotifyAlbum) {
+export async function getCachedPlexTracks(plexSearchConfig: PlexMusicSearchConfig, data: GetYouTubeMusicPlaylist | GetYouTubeMusicAlbum) {
     const { add, found: cachedTrackLinks } = getCachedTrackLinks(data.tracks, 'plex');
     const result: SearchResponse[] = [];
 
@@ -16,7 +16,7 @@ export async function getCachedPlexTracks(plexSearchConfig: PlexMusicSearchConfi
             continue;
 
         // Process if no cached link has been found
-        const trackLink = cachedTrackLinks.find(item => item.spotify_id == searchItem.id);
+        const trackLink = cachedTrackLinks.find(item => item.source_id == searchItem.id);
         if (!trackLink?.plex_id || trackLink.plex_id?.length == 0)
             continue;
 

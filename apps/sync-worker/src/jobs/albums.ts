@@ -1,7 +1,7 @@
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
-import { searchAlbum } from "@spotify-to-plex/plex-music-search/functions/searchAlbum";
-import { SearchResponse } from "@spotify-to-plex/plex-music-search/types/SearchResponse";
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
+import { searchAlbum } from "@youtube-to-plex/plex-music-search/functions/searchAlbum";
+import { SearchResponse } from "@youtube-to-plex/plex-music-search/types/SearchResponse";
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { findMissingTidalAlbums } from "../utils/findMissingTidalAlbums";
@@ -13,10 +13,10 @@ import { clearSyncTypeLogs } from "../utils/clearSyncTypeLogs";
 import { completeSyncType } from "../utils/completeSyncType";
 import { errorSyncType } from "../utils/errorSyncType";
 import { updateSyncTypeProgress } from "../utils/updateSyncTypeProgress";
-import { loadSpotifyData } from "../utils/loadSpotifyData";
-import { getSettings } from "@spotify-to-plex/plex-config/functions/getSettings";
-import { LidarrAlbumData } from "@spotify-to-plex/shared-types/lidarr/LidarrAlbumData";
-import { SlskdTrackData } from "@spotify-to-plex/shared-types/slskd/SlskdTrackData";
+import { loadYouTubeMusicData } from "../utils/loadYouTubeMusicData";
+import { getSettings } from "@youtube-to-plex/plex-config/functions/getSettings";
+import { LidarrAlbumData } from "@youtube-to-plex/shared-types/lidarr/LidarrAlbumData";
+import { SlskdTrackData } from "@youtube-to-plex/shared-types/slskd/SlskdTrackData";
 
 export async function syncAlbums() {
     // Start sync type logging
@@ -36,7 +36,7 @@ export async function syncAlbums() {
         if (!settings.uri || !settings.token)
             throw new Error("No plex connection found")
 
-        const missingSpotifyAlbums: string[] = []
+        const missingYouTubeMusicAlbums: string[] = []
         const missingTidalAlbums: string[] = []
         const missingAlbumsLidarr: LidarrAlbumData[] = []
         const missingTracksSlskd: SlskdTrackData[] = []
@@ -66,11 +66,11 @@ export async function syncAlbums() {
             }
 
             //////////////////////////////////
-            // Load Spotify Data
+            // Load YouTube Music data
             //////////////////////////////////
-            const data = await loadSpotifyData(uri, user)
+            const data = await loadYouTubeMusicData(uri, user)
             if (!data) {
-                logError(itemLog, `Spotify data could not be loaded`)
+                logError(itemLog, `YouTube Music data could not be loaded`)
                 continue;
             }
 
@@ -108,8 +108,8 @@ export async function syncAlbums() {
                 continue;
             }
 
-            if (!missingSpotifyAlbums.includes(data.id))
-                missingSpotifyAlbums.push(data.id)
+            if (!missingYouTubeMusicAlbums.includes(data.id))
+                missingYouTubeMusicAlbums.push(data.id)
 
             console.log(`Some tracks on the album seem to be missing ${data.tracks.length}/ ${missingTracks.length}: ${data.title}`)
             const tidalIds = await findMissingTidalAlbums(missingTracks)
@@ -136,7 +136,7 @@ export async function syncAlbums() {
                     missingAlbumsLidarr.push({
                         artist_name: artist,
                         album_name: album,
-                        spotify_album_id: data.id
+                        source_album_id: data.id
                     });
                 }
             });
@@ -144,16 +144,16 @@ export async function syncAlbums() {
             // Collect track data for SLSKD
             missingTracks.forEach(track => {
                 if (!track.id) return; // Skip tracks with null id (local files/unavailable)
-                const spotifyId = track.id.indexOf(":") > -1 ? track.id.split(":")[2] : track.id;
+                const sourceId = track.id.indexOf(":") > -1 ? track.id.split(":")[2] : track.id;
                 const artist = track.artists[0] || 'Unknown Artist';
                 const trackName = track.title || 'Unknown Track';
                 const album = track.album || 'Unknown Album';
-                const key = `${spotifyId}`;
+                const key = `${sourceId}`;
 
                 // Check if track already exists in the array
-                if (spotifyId && !missingTracksSlskd.some(item => item.spotify_id === key)) {
+                if (sourceId && !missingTracksSlskd.some(item => item.source_id === key)) {
                     missingTracksSlskd.push({
-                        spotify_id: spotifyId,
+                        source_id: sourceId,
                         artist_name: artist,
                         track_name: trackName,
                         album_name: album
@@ -167,7 +167,7 @@ export async function syncAlbums() {
             logComplete(itemLog)
 
             // Store the missing albums and tracks
-            writeFileSync(join(getStorageDir(), 'missing_albums_spotify.txt'), missingSpotifyAlbums.map(id => `https://open.spotify.com/album/${id}`).join('\n'))
+            writeFileSync(join(getStorageDir(), 'missing_albums_youtube_music.txt'), missingYouTubeMusicAlbums.map(id => `https://music.youtube.com/browse/${id}`).join('\n'))
             writeFileSync(join(getStorageDir(), 'missing_albums_tidal.txt'), missingTidalAlbums.map(id => `https://tidal.com/browse/album/${id}`).join('\n'))
             writeFileSync(join(getStorageDir(), 'missing_albums_lidarr.json'), JSON.stringify(missingAlbumsLidarr, null, 2))
             writeFileSync(join(getStorageDir(), 'missing_tracks_slskd.json'), JSON.stringify(missingTracksSlskd, null, 2))

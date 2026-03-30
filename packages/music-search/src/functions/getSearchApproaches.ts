@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { SearchApproachConfig } from '../types/SearchApproachConfig';
 import { readJSON } from './readJSON';
 import { updateSearchApproaches } from './updateSearchApproaches';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
 import { DEFAULT_SEARCH_APPROACHES } from '../config/default-config';
 
 const SEARCH_APPROACHES_FILE = 'search-approaches.json';

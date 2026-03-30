@@ -1,14 +1,14 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getCachedTrackLinks } from '@spotify-to-plex/shared-utils/cache/getCachedTrackLink';
-import { getById } from '@spotify-to-plex/plex-music-search/functions/getById';
-import { PlexMusicSearchTrack } from '@spotify-to-plex/plex-music-search/types/PlexMusicSearchTrack';
-import { PlexTrack } from '@spotify-to-plex/plex-music-search/types/PlexTrack';
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
+import { getCachedTrackLinks } from '@youtube-to-plex/shared-utils/cache/getCachedTrackLink';
+import { getById } from '@youtube-to-plex/plex-music-search/functions/getById';
+import { PlexMusicSearchTrack } from '@youtube-to-plex/plex-music-search/types/PlexMusicSearchTrack';
+import { PlexTrack } from '@youtube-to-plex/plex-music-search/types/PlexTrack';
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
 
-import { SearchResponse } from '@spotify-to-plex/plex-music-search/types/SearchResponse';
+import { SearchResponse } from '@youtube-to-plex/plex-music-search/types/SearchResponse';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
-import { getSettings } from '@spotify-to-plex/plex-config/functions/getSettings';
+import { getSettings } from '@youtube-to-plex/plex-config/functions/getSettings';
 
 async function getPlexTracks(plexIds: string[], plexConfig: any) {
     const foundTracks: PlexTrack[] = []
@@ -63,7 +63,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                         continue;
 
                     // Process if no cached link has been found
-                    const trackLink = cachedTrackLinks.find(item => item.spotify_id === searchItem.id)
+                    const trackLink = cachedTrackLinks.find(item => item.source_id === searchItem.id)
                     if (!trackLink?.plex_id || trackLink.plex_id?.length === 0)
                         continue;
 

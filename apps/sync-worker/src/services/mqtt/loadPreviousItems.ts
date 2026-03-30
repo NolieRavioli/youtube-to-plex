@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
 import { PublishedItem } from './types';
 
 /**
@@ -27,7 +27,7 @@ export function loadPreviousItems(): PublishedItem[] {
                 // Convert old format to new format
                 return parsed.map(id => ({
                     id,
-                    entity_id: `sensor.spotify_to_plex_item_${id.toLowerCase().replace(/[^\da-z]/g, '')}`,
+                    entity_id: `sensor.youtube_music_to_plex_item_${id.toLowerCase().replace(/[^\da-z]/g, '')}`,
                     category: '',
                 }));
             }

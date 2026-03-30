@@ -1,7 +1,7 @@
 /* eslint-disable max-depth */
-import { search as musicSearch } from "@spotify-to-plex/music-search/functions/search";
-import { filterOutWords } from "@spotify-to-plex/music-search/utils/filterOutWords";
-import { Track } from "@spotify-to-plex/music-search/types/Track";
+import { search as musicSearch } from "@youtube-to-plex/music-search/functions/search";
+import { filterOutWords } from "@youtube-to-plex/music-search/utils/filterOutWords";
+import { Track } from "@youtube-to-plex/music-search/types/Track";
 import { PlexMusicSearchApproach } from "../types/PlexMusicSearchApproach";
 import { PlexMusicSearchTrack } from "../types/PlexMusicSearchTrack";
 import { SearchQuery } from "../types/SearchResponse";

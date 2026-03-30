@@ -1,4 +1,4 @@
-import { MatchFilterConfig } from '@spotify-to-plex/shared-types/common/MatchFilterConfig';
+import { MatchFilterConfig } from '@youtube-to-plex/shared-types/common/MatchFilterConfig';
 import { ValidationResult } from './ValidationResult';
 import { validateMatchFilterConfig } from './validateMatchFilterConfig';
 import { getMatchFilterValidationErrors } from './getMatchFilterValidationErrors';

@@ -14,7 +14,7 @@ export function loadMQTTConfig(): MQTTConfig {
         brokerUrl,
         username: process.env.MQTT_USERNAME?.trim() || undefined,
         password: process.env.MQTT_PASSWORD?.trim() || undefined,
-        topicPrefix: process.env.MQTT_TOPIC_PREFIX?.trim() || 'spotify_to_plex',
+        topicPrefix: process.env.MQTT_TOPIC_PREFIX?.trim() || 'youtube_music_to_plex',
         discoveryPrefix: 'homeassistant',
     };
 }

@@ -1,7 +1,7 @@
 import { schedule } from 'node-cron';
 import { spawn } from 'node:child_process';
-import { getLidarrSettings } from '@spotify-to-plex/plex-config/functions/getLidarrSettings';
-import { getSlskdSettings } from '@spotify-to-plex/plex-config/functions/getSlskdSettings';
+import { getLidarrSettings } from '@youtube-to-plex/plex-config/functions/getLidarrSettings';
+import { getSlskdSettings } from '@youtube-to-plex/plex-config/functions/getSlskdSettings';
 
 const SYNC_SCHEDULE = '0 2 * * *'; // Every day at 02:00
 const LIDARR_SYNC_SCHEDULE = '0 4 * * *'; // Every day at 04:00

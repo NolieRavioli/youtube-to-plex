@@ -13,12 +13,11 @@ const MusicSearchConfigIndexPage: NextPage = () => {
                             System Overview
                         </Typography>
                         <Typography variant="body1">
-                            The Music Search Configuration system matches tracks from your Spotify playlists to tracks in your Plex media library. There are mainy cases when the naming in Spotify is not the same as the naming in Plex. This is where the configuration comes in. Trying to match based on different scenario&apos;s.
+                            The Music Search Configuration system matches tracks from your YouTube Music playlists and library items to tracks in your Plex media library. Metadata often differs between YouTube Music and Plex, so these settings control how aggressively the app normalizes text and searches for the best match.
                         </Typography>
 
                         <Divider sx={{ my: 4 }} />
 
-                        {/* Visual Flow Diagram */}
                         <Typography variant="h5" gutterBottom fontWeight="bold">
                             Processing Flow
                         </Typography>
@@ -31,7 +30,7 @@ const MusicSearchConfigIndexPage: NextPage = () => {
                                 my: 4,
                                 gap: { xs: 1, md: 0 },
                             }}>
-                            <ProcessingStep title="Spotify Track" description="Source metadata" />
+                            <ProcessingStep title="Source Track" description="YouTube Music metadata" />
                             <ProcessingStep title="Text Processing" description="Clean & normalize" />
                             <ProcessingStep title="Search Approaches" description="Multiple strategies" />
                             <ProcessingStep title="Match Filters" description="Quality scoring" />
@@ -40,7 +39,6 @@ const MusicSearchConfigIndexPage: NextPage = () => {
 
                         <Divider sx={{ my: 4 }} />
 
-                        {/* Component Explanations */}
                         <Typography variant="h5" gutterBottom fontWeight="bold">
                             System Components
                         </Typography>
@@ -51,11 +49,11 @@ const MusicSearchConfigIndexPage: NextPage = () => {
                                         Text Processing
                                     </Typography>
                                     <Typography variant="body2" pb={1}>
-                                        Cleans and normalizes track metadata by removing special characters and other content (like &quot;Remaster&quot;, &quot;Deluxe Edition&quot;), and standardizing text formatting.
+                                        Cleans and normalizes track metadata by removing special characters and other content (like &quot;Remaster&quot; and &quot;Deluxe Edition&quot;), then standardizing text formatting.
                                     </Typography>
                                     <Typography variant="body2">
-                                        <strong>Examples:</strong> &quot;Song (Remaster)&quot; → &quot;song&quot;,
-                                        &quot;Track - 2023 Mix&quot; → &quot;track&quot;
+                                        <strong>Examples:</strong> &quot;Song (Remaster)&quot; to &quot;song&quot;,
+                                        &quot;Track - 2023 Mix&quot; to &quot;track&quot;
                                     </Typography>
                                 </CardContent>
                             </Card>
@@ -80,7 +78,7 @@ const MusicSearchConfigIndexPage: NextPage = () => {
                                         Match Filters
                                     </Typography>
                                     <Typography variant="body2" pb={1}>
-                                        Applies quality filters to rank potential matches based on matching songs, artist and albums.
+                                        Applies quality filters to rank potential matches based on matching songs, artists, and albums.
                                     </Typography>
                                 </CardContent>
                             </Card>

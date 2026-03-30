@@ -8,7 +8,7 @@ import { NextPage } from "next";
 import Head from "next/head";
 import { useCallback, useState } from "react";
 
-import SpotifyNavigation from "@/components/SpotifyNavigation";
+import MusicNavigation from "@/components/MusicNavigation";
 
 const Page: NextPage = () => {
 
@@ -25,7 +25,7 @@ const Page: NextPage = () => {
     const menuItems = [
         {
             title: 'Plex Search Settings',
-            description: 'Configure matching settings for Spotify to Plex search',
+            description: 'Configure matching settings for YouTube Music to Plex search',
             icon: <Tune sx={{ fontSize: 40 }} />,
             path: '/advanced/music-search-config'
         },
@@ -51,19 +51,19 @@ const Page: NextPage = () => {
 
     return (<>
         <Head>
-            <title>Spotify to Plex</title>
+            <title>YouTube Music to Plex</title>
         </Head>
         <MainLayout maxWidth="700px">
             <Container>
                 <Logo />
-                <SpotifyNavigation />
+                <MusicNavigation />
                 <Paper elevation={0} sx={{ p: 2, bgcolor: 'action.hover' }}>
 
                     <Typography variant="h4" sx={{ mt: 2, mb: 0.5 }}>
                         Advanced
                     </Typography>
                     <Typography variant="body1" sx={{ mb: 3 }}>
-                        Manage your Spotify connections, synchronization settings, and view system logs.
+                        Manage your YouTube Music connections, synchronization settings, and view system logs.
                     </Typography>
                     <Grid2 container spacing={2}>
                         {menuItems.map((item) => (

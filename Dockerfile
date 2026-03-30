@@ -29,7 +29,7 @@ RUN pnpm -r run clean || true
 RUN pnpm run build:packages
 
 # Build web application with Next.js standalone output (type checking disabled via next.config.js)
-RUN cd /build && NEXT_DOCKER=1 pnpm --filter @spotify-to-plex/web run build
+RUN cd /build && NEXT_DOCKER=1 pnpm --filter @youtube-to-plex/web run build
 
 # ===== PRODUCTION STAGE =====
 # Stage 2: Production runtime with Node.js 20, Python 3.11, Chromium, and Supervisor
@@ -41,11 +41,11 @@ ENV DEBIAN_FRONTEND=noninteractive \
     LC_ALL=C.UTF-8 \
     NODE_VERSION=20 \
     NODE_ENV=production \
-    PYTHONPATH=/app/apps/spotify-scraper \
+    PYTHONPATH=/app/apps/youtube-music-service \
     PORT=9030 \
     HOSTNAME=0.0.0.0 \
     PLEX_APP_ID=eXf+f9ktw3CZ8i45OY468WxriOCtoFxuNPzVeDcAwfw= \
-    SPOTIFY_SCRAPER_URL=http://localhost:3020 \
+    YTMUSIC_SERVICE_URL=http://localhost:3020 \
     STORAGE_DIR=/app/config
 
 # Install all production runtime dependencies in one layer
@@ -78,20 +78,20 @@ RUN pip install --upgrade pip setuptools wheel \
     && pip install --no-cache-dir supervisor
 
 # Create application directories
-RUN mkdir -p /app/config /app/apps/spotify-scraper /app/apps/sync-worker \
+RUN mkdir -p /app/config /app/apps/youtube-music-service /app/apps/sync-worker \
     /var/log/supervisor \
     && chmod 755 /app/config
 
-# Copy spotify-scraper application and install Python dependencies
-COPY apps/spotify-scraper/requirements.txt /app/apps/spotify-scraper/
-WORKDIR /app/apps/spotify-scraper
+# Copy YouTube Music service dependencies
+COPY apps/youtube-music-service/requirements.txt /app/apps/youtube-music-service/
+WORKDIR /app/apps/youtube-music-service
 # Install Python dependencies (pip already upgraded earlier)
 RUN git config --global url."https://github.com/".insteadOf "git@github.com:" \
     && pip install --no-cache-dir -r requirements.txt \
-    && python3 -c "from spotify_scraper import SpotifyClient; print('SpotifyScraper installed successfully')"
+    && python3 -c "from ytmusicapi import YTMusic; print('ytmusicapi installed successfully')"
 
-# Copy spotify-scraper application code
-COPY apps/spotify-scraper/ /app/apps/spotify-scraper/
+# Copy YouTube Music service code
+COPY apps/youtube-music-service/ /app/apps/youtube-music-service/
 
 # Copy sync-worker source and dependencies from node-builder
 COPY --from=node-builder /build/apps/sync-worker/src/ /app/apps/sync-worker/src/
@@ -118,7 +118,7 @@ WORKDIR /app
 
 # Expose ports
 # 9030: Web application (Next.js)
-# 3020: Spotify-scraper (internal service)
+# 3020: YouTube Music service (internal service)
 EXPOSE 9030 3020
 
 # Volume mount for configuration

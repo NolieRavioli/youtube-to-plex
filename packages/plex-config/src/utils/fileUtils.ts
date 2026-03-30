@@ -1,6 +1,6 @@
 /* eslint-disable custom/no-export-only-files */
 import { readFile, writeFile, pathExists, remove } from 'fs-extra';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
 
 import { join } from 'node:path';
 

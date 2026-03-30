@@ -1,9 +1,9 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { search } from '@spotify-to-plex/slskd-music-search/functions/search';
-import { queueDownload } from '@spotify-to-plex/slskd-music-search/actions/queueDownload';
-import type { SlskdMusicSearchTrack } from '@spotify-to-plex/slskd-music-search';
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
-import { getSlskdSettings } from '@spotify-to-plex/plex-config/functions/getSlskdSettings';
+import { search } from '@youtube-to-plex/slskd-music-search/functions/search';
+import { queueDownload } from '@youtube-to-plex/slskd-music-search/actions/queueDownload';
+import type { SlskdMusicSearchTrack } from '@youtube-to-plex/slskd-music-search';
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
+import { getSlskdSettings } from '@youtube-to-plex/plex-config/functions/getSlskdSettings';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 

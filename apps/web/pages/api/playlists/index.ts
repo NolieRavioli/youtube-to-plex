@@ -1,16 +1,16 @@
-import { AxiosRequest } from '@spotify-to-plex/http-client/AxiosRequest';
+import { AxiosRequest } from '@youtube-to-plex/http-client/AxiosRequest';
 import { generateError } from '@/helpers/errors/generateError';
-import { getAPIUrl } from '@spotify-to-plex/shared-utils/utils/getAPIUrl';
-import { putPlaylistPoster } from '@spotify-to-plex/plex-helpers/playlist/putPlaylistPoster';
-import { addItemsToPlaylist } from '@spotify-to-plex/plex-helpers/playlist/addItemsToPlaylist';
-import { storePlaylist } from '@spotify-to-plex/plex-helpers/playlist/storePlaylist';
-import { getPlexUri } from '@spotify-to-plex/plex-helpers/utils/getPlexUri';
-import { GetPlaylistResponse } from '@spotify-to-plex/shared-types/plex/GetPlaylistResponse';
-import { Playlist } from '@spotify-to-plex/shared-types/plex/Playlist';
+import { getAPIUrl } from '@youtube-to-plex/shared-utils/utils/getAPIUrl';
+import { putPlaylistPoster } from '@youtube-to-plex/plex-helpers/playlist/putPlaylistPoster';
+import { addItemsToPlaylist } from '@youtube-to-plex/plex-helpers/playlist/addItemsToPlaylist';
+import { storePlaylist } from '@youtube-to-plex/plex-helpers/playlist/storePlaylist';
+import { getPlexUri } from '@youtube-to-plex/plex-helpers/utils/getPlexUri';
+import { GetPlaylistResponse } from '@youtube-to-plex/shared-types/plex/GetPlaylistResponse';
+import { Playlist } from '@youtube-to-plex/shared-types/plex/Playlist';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
-import { addPlaylist } from '@spotify-to-plex/plex-config/functions/addPlaylist';
-import { getSettings } from '@spotify-to-plex/plex-config/functions/getSettings';
+import { addPlaylist } from '@youtube-to-plex/plex-config/functions/addPlaylist';
+import { getSettings } from '@youtube-to-plex/plex-config/functions/getSettings';
 
 export type GetPlexPlaylistResponse = {
     key: Playlist["key"],

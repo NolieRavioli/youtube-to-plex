@@ -1,5 +1,5 @@
-import { SearchConfig } from "@spotify-to-plex/music-search/types/SearchConfig";
-import { MusicSearchConfig } from "@spotify-to-plex/music-search/types/MusicSearchConfig";
+import { SearchConfig } from "@youtube-to-plex/music-search/types/SearchConfig";
+import { MusicSearchConfig } from "@youtube-to-plex/music-search/types/MusicSearchConfig";
 import { PlexMusicSearchApproach } from "./PlexMusicSearchApproach";
 
 

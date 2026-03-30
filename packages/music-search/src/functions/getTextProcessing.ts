@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { TextProcessingConfig } from '../types/TextProcessingConfig';
 import { readJSON } from './readJSON';
 import { updateTextProcessing } from './updateTextProcessing';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
 import { DEFAULT_TEXT_PROCESSING } from '../config/default-config';
 
 const TEXT_PROCESSING_FILE = 'text-processing.json';

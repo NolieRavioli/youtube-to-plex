@@ -1,9 +1,9 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getLidarrSettings } from '@spotify-to-plex/plex-config/functions/getLidarrSettings';
-import { LidarrAddAlbumRequest } from '@spotify-to-plex/shared-types/lidarr/LidarrAddAlbumRequest';
-import { getMusicBrainzIds } from '@spotify-to-plex/shared-utils/lidarr/getMusicBrainzIds';
-import { lookupLidarrAlbum } from '@spotify-to-plex/shared-utils/lidarr/lookupLidarrAlbum';
-import { monitorAndSearchAlbum } from '@spotify-to-plex/shared-utils/lidarr/monitorAndSearchAlbum';
+import { getLidarrSettings } from '@youtube-to-plex/plex-config/functions/getLidarrSettings';
+import { LidarrAddAlbumRequest } from '@youtube-to-plex/shared-types/lidarr/LidarrAddAlbumRequest';
+import { getMusicBrainzIds } from '@youtube-to-plex/shared-utils/lidarr/getMusicBrainzIds';
+import { lookupLidarrAlbum } from '@youtube-to-plex/shared-utils/lidarr/lookupLidarrAlbum';
+import { monitorAndSearchAlbum } from '@youtube-to-plex/shared-utils/lidarr/monitorAndSearchAlbum';
 import axios from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
@@ -11,14 +11,14 @@ import { createRouter } from 'next-connect';
 const router = createRouter<NextApiRequest, NextApiResponse>()
     .post(async (req, res) => {
         try {
-            const { spotify_album_id, artist_name, album_name } = req.body;
+            const { source_album_id, artist_name, album_name } = req.body;
 
-            if (!spotify_album_id) {
-                console.error('spotify_album_id is required');
+            if (!source_album_id) {
+                console.error('source_album_id is required');
 
                 return res.status(400).json({
                     success: false,
-                    message: 'spotify_album_id is required',
+                    message: 'source_album_id is required',
                 });
             }
 
@@ -47,11 +47,11 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
             }
 
             // Step 1: Get MusicBrainz IDs (with fallback using artist/album names)
-            const musicBrainzIds = await getMusicBrainzIds(spotify_album_id, artist_name, album_name);
+            const musicBrainzIds = await getMusicBrainzIds(source_album_id, artist_name, album_name);
             if (!musicBrainzIds) {
                 return res.status(404).json({
                     success: false,
-                    message: `No MusicBrainz mapping found for Spotify album: ${spotify_album_id}`,
+                    message: `No MusicBrainz mapping found for source album: ${source_album_id}`,
                 });
             }
 

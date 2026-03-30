@@ -16,7 +16,7 @@ export function createDiscoveryConfig(entity: MQTTEntity, topicPrefix: string) {
         icon: entity.icon,
         device: {
             identifiers: [topicPrefix],
-            name: 'Spotify to Plex',
+            name: 'YouTube Music to Plex',
             manufacturer: 'Custom',
             model: 'MQTT Bridge',
         },

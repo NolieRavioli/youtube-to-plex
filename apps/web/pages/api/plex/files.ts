@@ -1,10 +1,10 @@
 import { generateError } from "@/helpers/errors/generateError"
-import { getMetaData } from "@spotify-to-plex/plex-music-search/functions/getMetaData";
-import { Metadata } from "@spotify-to-plex/plex-music-search/types/plex/Metadata";
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
+import { getMetaData } from "@youtube-to-plex/plex-music-search/functions/getMetaData";
+import { Metadata } from "@youtube-to-plex/plex-music-search/types/plex/Metadata";
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
 import { NextApiRequest, NextApiResponse } from "next"
 import { createRouter } from "next-connect"
-import { getSettings } from "@spotify-to-plex/plex-config/functions/getSettings";
+import { getSettings } from "@youtube-to-plex/plex-config/functions/getSettings";
 
 const router = createRouter<NextApiRequest, NextApiResponse>()
     .get(

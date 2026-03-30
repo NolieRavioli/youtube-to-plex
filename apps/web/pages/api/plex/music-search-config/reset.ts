@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 import { generateError } from '@/helpers/errors/generateError';
-import { resetToDefaults } from '@spotify-to-plex/music-search/functions/resetToDefaults';
+import { resetToDefaults } from '@youtube-to-plex/music-search/functions/resetToDefaults';
 
 const router = createRouter<NextApiRequest, NextApiResponse>()
     .post(

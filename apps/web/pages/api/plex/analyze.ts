@@ -1,10 +1,10 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { analyze } from '@spotify-to-plex/plex-music-search/functions/analyze';
-import { PlexMusicSearchTrack } from '@spotify-to-plex/plex-music-search/types/PlexMusicSearchTrack';
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
+import { analyze } from '@youtube-to-plex/plex-music-search/functions/analyze';
+import { PlexMusicSearchTrack } from '@youtube-to-plex/plex-music-search/types/PlexMusicSearchTrack';
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
-import { getSettings } from '@spotify-to-plex/plex-config/functions/getSettings';
+import { getSettings } from '@youtube-to-plex/plex-config/functions/getSettings';
 
 
 const router = createRouter<NextApiRequest, NextApiResponse>()

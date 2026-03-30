@@ -1,8 +1,8 @@
-import { getLidarrSettings } from "@spotify-to-plex/plex-config/functions/getLidarrSettings";
-import { getStorageDir } from "@spotify-to-plex/shared-utils/utils/getStorageDir";
-import { LidarrAlbumData } from "@spotify-to-plex/shared-types/lidarr/LidarrAlbumData";
-import { LidarrAddAlbumRequest } from "@spotify-to-plex/shared-types/lidarr/LidarrAddAlbumRequest";
-import { LidarrSyncLog } from "@spotify-to-plex/shared-types/lidarr/LidarrSyncLog";
+import { getLidarrSettings } from "@youtube-to-plex/plex-config/functions/getLidarrSettings";
+import { getStorageDir } from "@youtube-to-plex/shared-utils/utils/getStorageDir";
+import { LidarrAlbumData } from "@youtube-to-plex/shared-types/lidarr/LidarrAlbumData";
+import { LidarrAddAlbumRequest } from "@youtube-to-plex/shared-types/lidarr/LidarrAddAlbumRequest";
+import { LidarrSyncLog } from "@youtube-to-plex/shared-types/lidarr/LidarrSyncLog";
 import axios from "axios";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -12,9 +12,9 @@ import { clearSyncTypeLogs } from "../utils/clearSyncTypeLogs";
 import { completeSyncType } from "../utils/completeSyncType";
 import { errorSyncType } from "../utils/errorSyncType";
 import { updateSyncTypeProgress } from "../utils/updateSyncTypeProgress";
-import { getMusicBrainzIds } from "@spotify-to-plex/shared-utils/lidarr/getMusicBrainzIds";
-import { lookupLidarrAlbum } from "@spotify-to-plex/shared-utils/lidarr/lookupLidarrAlbum";
-import { monitorAndSearchAlbum } from "@spotify-to-plex/shared-utils/lidarr/monitorAndSearchAlbum";
+import { getMusicBrainzIds } from "@youtube-to-plex/shared-utils/lidarr/getMusicBrainzIds";
+import { lookupLidarrAlbum } from "@youtube-to-plex/shared-utils/lidarr/lookupLidarrAlbum";
+import { monitorAndSearchAlbum } from "@youtube-to-plex/shared-utils/lidarr/monitorAndSearchAlbum";
 
 export async function syncLidarr() {
     console.log('Starting Lidarr sync...');
@@ -113,7 +113,7 @@ export async function syncLidarr() {
             try {
 
                 // VALIDATION: Skip albums with unknown album_id
-                if (album.spotify_album_id === 'unknown') {
+                if (album.source_album_id === 'unknown') {
                     albumLog.status = 'error';
                     albumLog.error = 'Album ID is unknown (likely from simplified mode or incomplete data)';
                     albumLog.end = Date.now();
@@ -123,10 +123,10 @@ export async function syncLidarr() {
                     continue;
                 }
 
-                // VALIDATION: Ensure spotify_album_id exists
-                if (!album.spotify_album_id) {
+                // VALIDATION: Ensure source_album_id exists
+                if (!album.source_album_id) {
                     albumLog.status = 'error';
-                    albumLog.error = 'Missing spotify_album_id';
+                    albumLog.error = 'Missing source_album_id';
                     albumLog.end = Date.now();
                     errorCount++;
                     lidarrLogs[logId] = albumLog;
@@ -134,7 +134,7 @@ export async function syncLidarr() {
                 }
 
                 // STEP 1: Get MusicBrainz IDs (with fallback using artist/album names)
-                const musicBrainzIds = await getMusicBrainzIds(album.spotify_album_id, album.artist_name, album.album_name);
+                const musicBrainzIds = await getMusicBrainzIds(album.source_album_id, album.artist_name, album.album_name);
 
                 if (!musicBrainzIds) {
                     albumLog.status = 'not_found';

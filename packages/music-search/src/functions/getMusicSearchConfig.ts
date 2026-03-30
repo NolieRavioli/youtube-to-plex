@@ -1,7 +1,7 @@
 import { getMatchFilters } from './getMatchFilters';
 import { getTextProcessing } from './getTextProcessing';
 import { getSearchApproaches } from './getSearchApproaches';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
 
 export async function getMusicSearchConfig() {
 

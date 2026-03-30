@@ -1,5 +1,5 @@
-import { search as musicSearch } from "@spotify-to-plex/music-search/functions/search";
-import { Track } from "@spotify-to-plex/music-search/types/Track";
+import { search as musicSearch } from "@youtube-to-plex/music-search/functions/search";
+import { Track } from "@youtube-to-plex/music-search/types/Track";
 import { TidalMusicSearchConfig } from "../types/TidalMusicSearchConfig";
 import { TidalMusicSearchTrack } from "../types/TidalMusicSearchTrack";
 import { searchForAlbum } from "../utils/searchForAlbum";

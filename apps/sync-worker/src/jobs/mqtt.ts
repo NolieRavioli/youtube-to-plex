@@ -1,8 +1,8 @@
-import { getSettings } from '@spotify-to-plex/plex-config/functions/getSettings';
-import { getById } from '@spotify-to-plex/plex-music-search/functions/getById';
-import { PlexMusicSearchConfig } from '@spotify-to-plex/plex-music-search/types/PlexMusicSearchConfig';
-import { SavedItem } from '@spotify-to-plex/shared-types/spotify/SavedItem';
-import { PlaylistData } from '@spotify-to-plex/shared-types/dashboard/PlaylistData';
+import { getSettings } from '@youtube-to-plex/plex-config/functions/getSettings';
+import { getById } from '@youtube-to-plex/plex-music-search/functions/getById';
+import { PlexMusicSearchConfig } from '@youtube-to-plex/plex-music-search/types/PlexMusicSearchConfig';
+import { SavedItem } from '@youtube-to-plex/shared-types/youtube-music/SavedItem';
+import { PlaylistData } from '@youtube-to-plex/shared-types/dashboard/PlaylistData';
 import { getNestedSyncLogsForType } from '../utils/getNestedSyncLogsForType';
 import { startSyncType } from '../utils/startSyncType';
 import { clearSyncTypeLogs } from '../utils/clearSyncTypeLogs';
@@ -120,7 +120,7 @@ export async function syncMQTT() {
                 }
 
                 // Fetch Plex metadata
-                const isPlaylist = item.type === 'spotify-playlist' || (item.type === 'plex-media' && item.uri?.includes('/playlists/'));
+                const isPlaylist = item.type === 'youtube-music-playlist' || item.type === 'youtube-music-liked' || (item.type === 'plex-media' && item.uri?.includes('/playlists/'));
                 const plexEndpoint = isPlaylist ? `/playlists/${plexId}` : `/library/metadata/${plexId}`;
 
                 let plexMetadata;
@@ -163,12 +163,13 @@ export async function syncMQTT() {
                 // Update counters
                 successCount++;
                 switch (item.type) {
-                    case 'spotify-playlist': {
+                    case 'youtube-music-playlist':
+                    case 'youtube-music-liked': {
                         countByType.playlists++;
 
                         break;
                     }
-                    case 'spotify-album': {
+                    case 'youtube-music-album': {
                         countByType.albums++;
 
                         break;
@@ -255,9 +256,10 @@ export async function syncMQTT() {
 function resolvePlexId(item: SavedItem, playlists: PlaylistData, trackLinks: TrackLink[]) {
 
     switch (item.type) {
-        case 'spotify-playlist':
+        case 'youtube-music-playlist':
+        case 'youtube-music-liked':
             return findPlaylistPlexId(item.id, playlists);
-        case 'spotify-album':
+        case 'youtube-music-album':
             const plexPath = findAlbumPlexId(item.id, trackLinks);
             if (plexPath) {
                 const match = /\/library\/metadata\/(\d+)/.exec(plexPath);

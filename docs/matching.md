@@ -5,84 +5,77 @@ nav_order: 5
 
 # Track Matching
 
-This app tries to match songs as best as possible using different approaches. When a song can't be matched even though you have it, it's best to raise an issue so we can dive into it.
+The app tries to match YouTube Music tracks to Plex as accurately as possible using multiple search approaches. When a song still misses, the analyzer and missing-track exports make the failure explicit.
 
 ---
 
 ## How Matching Works
 
-The app uses multiple search strategies to find your songs in Plex:
+The app uses multiple search strategies to find songs in Plex:
 
 - Artist and track name matching
 - Album cross-referencing
-- Fuzzy matching for variations (remixes, live versions)
+- Fuzzy matching for remixes, live versions, and radio edits
 - Multiple search approaches with customizable settings
 
-When a song is found but isn't a perfect match, you will see a warning indicator.
+When a song is found but is not a perfect match, the UI shows a warning indicator.
 
 ---
 
 ## Analyzing Unmatched Tracks
 
-When a song is not getting matched, you can analyze the track in the Music Search Configuration (in the Advanced tab).
+When a song is not getting matched, use the analyzer in the Advanced tab.
 
 ![Track Analyzer](assets/images/track_analyzer.jpg)
 
-This shows you exactly what is going on and helps identify why a track couldn't be found.
+This shows how the source track was normalized and why Plex matching did or did not succeed.
 
 ---
 
 ## Missing Songs
 
-You can view all songs that cannot be matched and:
+You can view all songs that could not be matched and:
 
-- Download as a text file containing all song links
-- Match them with Tidal (requires [Tidal credentials](installation#3-tidal-api-credentials-optional))
-- Send missing albums to [Lidarr](integrations/lidarr) for automatic download
-- Search via [SLSKD](integrations/slskd) for P2P downloads
+- Download a text file containing the source links
+- Match them with Tidal
+- Send missing albums to [Lidarr](integrations/lidarr)
+- Search via [SLSKD](integrations/slskd)
 
 ---
 
-## Spotify API Limitations
+## YouTube Music Metadata Notes
 
-Due to changes to Spotify's Web API (November 2024), many public Spotify-owned playlists can no longer be accessed through the official API. To work around these limitations, this project leverages [SpotifyScraper](https://github.com/AliAkhtari78/SpotifyScraper) for extracting playlist data.
+YouTube Music data can be noisier than album-catalog metadata. Playlist entries may come from videos, uploads, or alternate releases with inconsistent titles.
 
-### Limitations
+The current pipeline normalizes:
 
-| Limitation | Details |
-|------------|---------|
-| Track limit | Playlists scraped through SpotifyScraper are limited to 100 tracks |
-| Rate limiting | Large numbers of requests may be throttled |
+- artist names
+- track titles
+- album names when available
+- durations when YouTube Music exposes them
 
 {: .note }
-For Spotify-owned playlists with more than 100 tracks, copy the playlist to a private playlist and use that URL instead.
+Video-aware matching improvements and richer MusicBrainz-assisted reconciliation are reasonable follow-up work, but they are not required for the core migration.
 
 ---
 
-## Performance & Caching
+## Performance and Caching
 
-Most API requests to Plex and Tidal take time, so data is cached extensively.
+Most API requests to Plex and Tidal take time, so data is cached heavily.
 
 ### How Caching Works
 
-- When a song is matched once, it will not try to match it again
-- When reloading an existing playlist, only missing songs are searched
-- Requests are made in sets of 5 tracks at a time
-- You can interrupt the process - matched songs are saved immediately
+- When a song is matched once, it will not be matched again unless you refresh
+- Reloading an existing playlist skips already-cached matches
+- Requests are made in small batches to keep matching stable
+- You can interrupt a run without losing already-saved matches
 
 ### Removing Cache
 
-All cached data is stored in `track_links.json` in the storage folder.
+All cached track matches are stored in `track_links.json` in the storage folder.
 
 **Options:**
 1. Delete `track_links.json` to remove all cached matches
-2. Click the refresh icon on the playlist screen to reload ignoring cache
+2. Click the refresh icon on a playlist import to ignore cache for that run
 
 ![Clear Cache](assets/images/clear_cache.jpg)
-
-### Large Playlists
-
-For extremely large playlists (200+ songs), you're prompted to use the `fast` search option. This scans your library using only the first search approach for better performance.
-
-{: .note }
-Any matched songs are cached, so there is little harm to interrupting the process. Matched songs will be skipped on the next sync.

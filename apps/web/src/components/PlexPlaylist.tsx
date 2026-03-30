@@ -1,10 +1,10 @@
 /* eslint-disable max-lines */
 import { errorBoundary } from "@/helpers/errors/errorBoundary";
 import { GetPlexPlaylistIdResponse } from "@/pages/api/playlists/[id]";
-import { GetSpotifyAlbum } from "@spotify-to-plex/shared-types/spotify/GetSpotifyAlbum";
-import { GetSpotifyPlaylist } from "@spotify-to-plex/shared-types/spotify/GetSpotifyPlaylist";
-import { Track } from "@spotify-to-plex/shared-types/spotify/Track";
-import type { SearchResponse } from "@spotify-to-plex/plex-music-search/types/SearchResponse";
+import { GetYouTubeMusicAlbum } from "@youtube-to-plex/shared-types/youtube-music/GetYouTubeMusicAlbum";
+import { GetYouTubeMusicPlaylist } from "@youtube-to-plex/shared-types/youtube-music/GetYouTubeMusicPlaylist";
+import { Track } from "@youtube-to-plex/shared-types/youtube-music/Track";
+import type { SearchResponse } from "@youtube-to-plex/plex-music-search/types/SearchResponse";
 import { Edit, Refresh } from "@mui/icons-material";
 import CloseIcon from '@mui/icons-material/Close';
 import { Alert, Box, Button, CircularProgress, Divider, IconButton, Input, Modal, Paper, Stack, Tooltip, Typography } from "@mui/material";
@@ -16,7 +16,7 @@ import PlexTrack from "./PlexTrack";
 import { getErrorMessage } from "@/helpers/errors/getErrorMessage";
 
 export type PlexPlaylistProps = {
-    readonly playlist: GetSpotifyAlbum | GetSpotifyPlaylist
+    readonly playlist: GetYouTubeMusicAlbum | GetYouTubeMusicPlaylist
     readonly fast: boolean
 }
 
@@ -118,7 +118,7 @@ export default function PlexPlaylist(props: PlexPlaylistProps) {
             const tracks = playlist.tracks.map(item => ({ id: item.id, artists: item.artists, title: item.title, album: item.album, album_id: item.album_id }))
 
             switch (playlist.type) {
-                case "spotify-album":
+                case "youtube-music-album":
                     // Search for album
                     const result = await axios.post<SearchResponse[]>('/api/plex/tracks', {
                         items: tracks,
@@ -129,7 +129,8 @@ export default function PlexPlaylist(props: PlexPlaylistProps) {
                     setTracks(result.data);
                     setTracksLoaded(tracks.map(item => item.id))
                     break;
-                case "spotify-playlist":
+                case "youtube-music-playlist":
+                case "youtube-music-liked":
 
                     // Load cached tracks
                     let cachedTracks: SearchResponse[] = [];
@@ -193,7 +194,7 @@ export default function PlexPlaylist(props: PlexPlaylistProps) {
         errorBoundary(async () => {
             const tracks = playlist.tracks.map(item => ({ id: item.id, artists: item.artists, title: item.title, album: item.album, album_id: item.album_id }))
             switch (playlist.type) {
-                case "spotify-album":
+                case "youtube-music-album":
                     const result = await axios.post<SearchResponse[]>('/api/plex/tracks', {
                         items: tracks,
                         type: playlist.type
@@ -203,7 +204,8 @@ export default function PlexPlaylist(props: PlexPlaylistProps) {
                     setTracksLoaded(tracks.map(item => item.id))
                     break;
 
-                case "spotify-playlist":
+                case "youtube-music-playlist":
+                case "youtube-music-liked":
                     await loadPlaylistTracks(tracks)
                     break;
             }
@@ -353,7 +355,7 @@ export default function PlexPlaylist(props: PlexPlaylistProps) {
                         <CircularProgress size={20} />
                     </Box>
                     <Box sx={{ flexGrow: 1, display: 'flex', gap: 1, justifyContent: 'space-between' }}>
-                        {playlist.type === 'spotify-playlist' ?
+                        {playlist.type !== 'youtube-music-album' ?
                             <Typography variant="body1" sx={{ color: 'text.secondary' }}>Processed {tracksLoaded.length} of {tracksToLoad} tracks</Typography>
                             :
                             <Typography variant="body1" sx={{ color: 'text.secondary' }}>
@@ -397,7 +399,7 @@ export default function PlexPlaylist(props: PlexPlaylistProps) {
             </Box>
         </Paper>
 
-        {playlist?.type === 'spotify-album' &&
+        {playlist?.type === 'youtube-music-album' &&
             <Box sx={{ mt: 1, mb: 1 }}>
                 <Alert variant="outlined" color="warning">
                     <Box sx={{ p: 1 }}>
@@ -417,10 +419,10 @@ export default function PlexPlaylist(props: PlexPlaylistProps) {
             <Box sx={{ mt: 1, mb: 1 }}>
                 <Alert variant="outlined" color="warning">
                     <Box sx={{ p: 1 }}>
-                        {playlist.type === 'spotify-playlist' &&
+                        {playlist.type !== 'youtube-music-album' &&
                             <Typography variant="h6" sx={{ mb: 0.5 }} color="warning">{missingTracks.length} tracks not found</Typography>
                         }
-                        {playlist.type === 'spotify-album' &&
+                        {playlist.type === 'youtube-music-album' &&
                             <Typography variant="h6" sx={{ mb: 0.5 }} color="warning">
                                 Album not found or incomplete
                             </Typography>

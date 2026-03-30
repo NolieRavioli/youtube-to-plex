@@ -1,69 +1,58 @@
-<p align="center"><img src="docs/assets/images/logo.png" width="90"></p>
-<h1 align="center">Spotify to Plex</h1>
+# YouTube Music to Plex
 
-<p align="center">
-  <a href="https://hub.docker.com/r/jjdenhertog/spotify-to-plex"><img src="https://img.shields.io/docker/pulls/jjdenhertog/spotify-to-plex?style=flat-square&logo=docker" alt="Docker Pulls"></a>
-  <a href="https://github.com/jjdenhertog/spotify-to-plex/stargazers"><img src="https://img.shields.io/github/stars/jjdenhertog/spotify-to-plex?style=flat-square&logo=github" alt="GitHub Stars"></a>
-  <a href="https://github.com/jjdenhertog/spotify-to-plex/blob/main/LICENSE"><img src="https://img.shields.io/github/license/jjdenhertog/spotify-to-plex?style=flat-square" alt="License"></a>
-  <a href="https://github.com/jjdenhertog/spotify-to-plex/issues"><img src="https://img.shields.io/github/issues/jjdenhertog/spotify-to-plex?style=flat-square" alt="Issues"></a>
-</p>
+This project syncs YouTube Music playlists, liked songs, and saved albums into Plex. It keeps the existing Plex matching pipeline, optional Tidal/Lidarr/SLSKD integrations, and background sync worker, but the source provider is now YouTube Music only.
 
-<p align="center">
-  A web application to sync your Spotify playlists with <a href="https://plex.tv/">Plex</a>. Automatically match songs, download missing tracks, and keep your music library in perfect sync.
-</p>
+## What It Does
 
-<p align="center">
-  <img src="docs/assets/images/app_overview.jpg" alt="Spotify to Plex Overview">
-</p>
+- Connect one or more Google accounts with YouTube Music access
+- Import YouTube Music playlists, liked songs, and library albums
+- Match source tracks against your Plex music library
+- Export missing items to Tidal, Lidarr, or SLSKD
+- Publish synced state to MQTT for Home Assistant
 
----
+## Required Credentials
 
-## Features
+You need a Google OAuth web client, not just a YouTube Data API key.
 
-- Sync any Spotify playlist with Plex (including Spotify-owned playlists)
-- Advanced track matching with multiple search strategies
-- Download missing tracks via Lidarr, SLSKD, or Tidal
-- Multiple Spotify user support
-- Scheduled automatic synchronization
-- Smart caching for faster syncs
----
+- `GOOGLE_OAUTH_CLIENT_ID`
+- `GOOGLE_OAUTH_CLIENT_SECRET`
+- `GOOGLE_OAUTH_REDIRECT_URI`
+- `ENCRYPTION_KEY`
 
-## Quick Start
+The redirect URI must exactly match the value configured in Google Cloud. For local Docker usage, a direct callback to the app is simplest:
 
-```sh
-docker run -d \
-    -e SPOTIFY_API_CLIENT_ID=YOUR_CLIENT_ID \
-    -e SPOTIFY_API_CLIENT_SECRET=YOUR_CLIENT_SECRET \
-    -e SPOTIFY_API_REDIRECT_URI=https://jjdenhertog.github.io/spotify-to-plex/callback.html \
-    -e ENCRYPTION_KEY=YOUR_ENCRYPTION_KEY \
-    -e PLEX_APP_ID=eXf+f9ktw3CZ8i45OY468WxriOCtoFxuNPzVeDcAwfw= \
-    -v /your/config/path:/app/config:rw \
-    --network=host \
-    jjdenhertog/spotify-to-plex
+```text
+http://127.0.0.1:9030/api/youtube-music/token
 ```
 
-Access the web interface at `http://[your-ip]:9030`
+## Docker
 
----
+```bash
+docker run -d \
+  --name youtube-music-to-plex \
+  -p 9030:9030 \
+  -v /path/to/config:/app/config \
+  -e GOOGLE_OAUTH_CLIENT_ID=YOUR_CLIENT_ID \
+  -e GOOGLE_OAUTH_CLIENT_SECRET=YOUR_CLIENT_SECRET \
+  -e GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:9030/api/youtube-music/token \
+  -e ENCRYPTION_KEY=YOUR_64_CHAR_HEX_KEY \
+  your-image-name
+```
 
-## Documentation
+Then open `http://localhost:9030`.
 
-For detailed setup instructions, configuration options, and integration guides:
+## Environment
 
-**[Read the full documentation](https://jjdenhertog.github.io/spotify-to-plex/)**
+See `apps/web/.env.example` for the current app configuration template.
 
----
+## Service Layout
 
-## Support This Open-Source Project
+- `apps/web`: Next.js UI and API routes
+- `apps/sync-worker`: background sync jobs
+- `apps/youtube-music-service`: primary YouTube Music service built on `ytmusicapi`
 
-If you appreciate my work, consider starring this repository or making a donation to support ongoing development. Your support means the world to me—thank you!
+## Current Notes
 
-[![Buy Me a Coffee](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/jjdenhertog)
-
-Are you a developer with some free time on your hands? It would be great if you can help me maintain and improve this project.
-
----
-
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
+- User recent-playback auto-discovery is intentionally disabled in the first YouTube Music migration.
+- MusicBrainz lookup now falls back to artist and album text matching for provider-neutral source IDs.
+- The remaining workspace package names still use a historical monorepo scope, but runtime behavior is YouTube Music only.

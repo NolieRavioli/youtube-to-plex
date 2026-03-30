@@ -4,7 +4,7 @@
  * Simple JSON structure without complex compilation
  */
 
-import { MatchFilterConfig } from '@spotify-to-plex/shared-types/common/MatchFilterConfig';
+import { MatchFilterConfig } from '@youtube-to-plex/shared-types/common/MatchFilterConfig';
 import { TextProcessingConfig } from '../types/TextProcessingConfig';
 import { SearchApproachConfig } from '../types/SearchApproachConfig';
 

@@ -1,8 +1,8 @@
 import { errorBoundary } from "@/helpers/errors/errorBoundary";
-import { GetSpotifyUserResponse } from "@/pages/api/spotify/users";
-import { GetSpotifyAlbum } from "@spotify-to-plex/shared-types/spotify/GetSpotifyAlbum";
-import { GetSpotifyPlaylist } from "@spotify-to-plex/shared-types/spotify/GetSpotifyPlaylist";
-import { SavedItem } from "@spotify-to-plex/shared-types/spotify/SavedItem";
+import { GetYouTubeMusicUserResponse } from "@/pages/api/youtube-music/users";
+import { GetYouTubeMusicAlbum } from "@youtube-to-plex/shared-types/youtube-music/GetYouTubeMusicAlbum";
+import { GetYouTubeMusicPlaylist } from "@youtube-to-plex/shared-types/youtube-music/GetYouTubeMusicPlaylist";
+import { SavedItem } from "@youtube-to-plex/shared-types/youtube-music/SavedItem";
 import { Add, Check, Close } from "@mui/icons-material";
 import { Box, Button, CircularProgress, Dialog, DialogContent, DialogTitle, Divider, IconButton, Paper, TextField, Tooltip, Typography } from "@mui/material";
 import axios from "axios";
@@ -11,14 +11,14 @@ import { ChangeEvent, useCallback, useEffect, useState } from "react";
 
 type Props = {
     readonly onClose: (event: React.MouseEvent | React.KeyboardEvent | Record<string, never>, reason?: string) => void,
-    readonly user: GetSpotifyUserResponse
-    readonly type: 'albums' | 'playlists'
+    readonly user: GetYouTubeMusicUserResponse
+    readonly type: 'albums' | 'playlists' | 'liked'
 }
 
 export default function UserItems(props: Props) {
 
     const { type, user, onClose: propsOnClose } = props;
-    const [items, setItems] = useState<(GetSpotifyAlbum | GetSpotifyPlaylist)[]>([])
+    const [items, setItems] = useState<(GetYouTubeMusicAlbum | GetYouTubeMusicPlaylist)[]>([])
 
     ///////////////////////////////////////////////
     // Load items
@@ -26,7 +26,7 @@ export default function UserItems(props: Props) {
     const [loading, setLoading] = useState(true)
     useEffect(() => {
         errorBoundary(async () => {
-            const result = await axios.get(`/api/spotify/users/${user.id}/items?type=${type}`)
+            const result = await axios.get(`/api/youtube-music/users/${user.id}/items?type=${type}`)
             setItems(result.data);
             setLoading(false)
         }, () => {
@@ -63,14 +63,11 @@ export default function UserItems(props: Props) {
 
         const item = items.find(item => item.id === id)
         if (item) {
-            let search = 'spotify:'
+            let search = `ytmusic:playlist:${id}`;
             if (type === 'albums')
-                search += 'album:'
-
-            if (type === 'playlists')
-                search += 'playlist:'
-
-            search += id;
+                search = `ytmusic:album:${id}`;
+            if (type === 'liked')
+                search = `ytmusic:liked:${user_id}`;
 
             const itemId = item.id
 
@@ -151,13 +148,13 @@ export default function UserItems(props: Props) {
 
             {!loading &&
                 <>
-                    <Typography variant="h6">Add {type}</Typography>
-                    <Typography variant="body1">Below you find an overview of all the {type} that you have saved in Spotify.</Typography>
+                    <Typography variant="h6">Add {type === 'liked' ? 'liked songs' : type}</Typography>
+                    <Typography variant="body1">Below is an overview of the {type === 'liked' ? 'liked songs playlist' : type} from this YouTube Music account.</Typography>
                     <Divider sx={{ mt: 2, mb: 2 }} />
                     <Paper elevation={0} sx={{ p: 2, bgcolor: 'action.hover' }}>
                         <Typography variant="h6" sx={{ mb: 0.5 }}>Label name</Typography>
                         <Typography variant="body2" sx={{ mb: 1 }}>
-                            This label will be connected to any items added.
+                            This label will be attached to any items you add.
                         </Typography>
                         <TextField value={label} size="small" sx={{ maxWidth: 200 }} placeholder="Change label" onChange={onEditLabelChange} />
                     </Paper>

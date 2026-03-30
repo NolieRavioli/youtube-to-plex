@@ -5,8 +5,8 @@
  * TypeScript type definitions for MQTT entities and Home Assistant Discovery
  */
 
-import { PlaylistData } from "@spotify-to-plex/shared-types/dashboard/PlaylistData";
-import { SavedItem } from "@spotify-to-plex/shared-types/spotify/SavedItem";
+import { PlaylistData } from "@youtube-to-plex/shared-types/dashboard/PlaylistData";
+import { SavedItem } from "@youtube-to-plex/shared-types/youtube-music/SavedItem";
 
 export type MQTTConfig = {
   brokerUrl: string;
@@ -54,7 +54,7 @@ export type PublishedItem = {
 };
 
 export type TrackLink = {
-  spotify_id: string;
+  source_id: string;
   plex_id?: string[];
   [key: string]: unknown;
 };

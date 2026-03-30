@@ -1,9 +1,9 @@
-import { AxiosRequest } from '@spotify-to-plex/http-client/AxiosRequest';
-import { GetPlaylistResponse } from '@spotify-to-plex/shared-types/plex/GetPlaylistResponse';
+import { AxiosRequest } from '@youtube-to-plex/http-client/AxiosRequest';
+import { GetPlaylistResponse } from '@youtube-to-plex/shared-types/plex/GetPlaylistResponse';
 import { PlexSettings } from '../PlexSettings';
 import { PlexPlaylistError } from '../PlexPlaylistError';
 import { validatePlexSettings } from '../utils/validatePlexSettings';
-import { getAPIUrl } from '@spotify-to-plex/shared-utils/utils/getAPIUrl';
+import { getAPIUrl } from '@youtube-to-plex/shared-utils/utils/getAPIUrl';
 
 /**
  * Creates a new Plex playlist

@@ -3,7 +3,7 @@ import { join } from "node:path"
 import { filterUnique } from "../array/filterUnique"
 import { getStorageDir } from "../utils/getStorageDir"
 
-import type { TrackLink } from "@spotify-to-plex/shared-types/common/track";
+import type { TrackLink } from "@youtube-to-plex/shared-types/common/track";
 
 type PlexMusicSearchTrack = {
     id: string;
@@ -35,7 +35,7 @@ export function getCachedTrackLinks(
     for (let i = 0; i < searchItems.length; i++) {
         const searchItem = searchItems[i];
 
-        const trackLink = all.find(item => item.spotify_id == searchItem?.id)
+        const trackLink = all.find(item => item.source_id == searchItem?.id)
         if (!trackLink)
             continue;
 
@@ -73,9 +73,9 @@ export function getCachedTrackLinks(
                     return;
 
                 // Create new track links if nont existant
-                let trackLink = all.find(item => item.spotify_id == searchItem.id)
+                let trackLink = all.find(item => item.source_id == searchItem.id)
                 if (!trackLink) {
-                    trackLink = { spotify_id: searchItem.id }
+                    trackLink = { source_id: searchItem.id }
                     all.push(trackLink)
                 }
 
@@ -113,9 +113,9 @@ export function getCachedTrackLinks(
             })
             albumIds = albumIds.filter(filterUnique)
 
-            let albumLink = all.find(item => item.spotify_id == album.id)
+            let albumLink = all.find(item => item.source_id == album.id)
             if (!albumLink) {
-                albumLink = { spotify_id: album.id }
+                albumLink = { source_id: album.id }
                 all.push(albumLink)
             }
 

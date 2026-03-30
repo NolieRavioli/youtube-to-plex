@@ -1,10 +1,10 @@
 /* eslint-disable unicorn/prefer-code-point */
 /* eslint-disable prefer-template */
 
-import { removeFeaturing } from "@spotify-to-plex/music-search/utils/removeFeaturing";
+import { removeFeaturing } from "@youtube-to-plex/music-search/utils/removeFeaturing";
 import { HubSearchResult } from "../types/actions/HubSearchResult";
 import { HubSearchResponse } from "../types/plex/HubSearchResponse";
-import { AxiosRequest } from "@spotify-to-plex/http-client/AxiosRequest";
+import { AxiosRequest } from "@youtube-to-plex/http-client/AxiosRequest";
 import getAPIUrl from "../utils/getAPIUrl";
 
 export default function hubSearch(uri: string, token: string, query: string, limit: number = 5) {

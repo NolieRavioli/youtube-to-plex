@@ -1,5 +1,5 @@
-import type { MusicSearchConfig } from "@spotify-to-plex/music-search/types/MusicSearchConfig";
-import type { TextProcessingConfig } from "@spotify-to-plex/music-search/types/TextProcessingConfig";
+import type { MusicSearchConfig } from "@youtube-to-plex/music-search/types/MusicSearchConfig";
+import type { TextProcessingConfig } from "@youtube-to-plex/music-search/types/TextProcessingConfig";
 import type { SlskdMusicSearchApproach } from "./SlskdMusicSearchApproach";
 
 /**

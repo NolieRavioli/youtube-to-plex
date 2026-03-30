@@ -6,7 +6,7 @@ has_children: true
 
 # Integrations
 
-Spotify to Plex supports several integrations to help you download missing tracks and find alternatives.
+YouTube Music to Plex supports several optional integrations to help you download missing tracks and publish categorized items.
 
 ---
 
@@ -15,9 +15,9 @@ Spotify to Plex supports several integrations to help you download missing track
 | Integration | Purpose |
 |-------------|---------|
 | [Lidarr](lidarr) | Automatically download complete albums |
-| [SLSKD](slskd) | P2P downloads from Soulseek network |
-| [Tidal](tidal) | Find and match tracks on Tidal |
-| [MQTT / Home Assistant](mqtt) | Publish categorized playlists to Home Assistant |
+| [SLSKD](slskd) | Peer-to-peer downloads from Soulseek |
+| [Tidal](tidal) | Find and compare tracks on Tidal |
+| [MQTT / Home Assistant](mqtt) | Publish categorized playlists and albums |
 
 ---
 
@@ -25,25 +25,16 @@ Spotify to Plex supports several integrations to help you download missing track
 
 ### Lidarr
 
-[Lidarr](https://github.com/Lidarr/Lidarr) is a music collection manager. When integrated, you can automatically send missing albums to Lidarr for download.
-
-{: .note }
-Lidarr downloads complete albums, not individual tracks. A playlist with songs from 50+ albums will trigger many album downloads.
+[Lidarr](https://github.com/Lidarr/Lidarr) is useful when a missing playlist track belongs to an album you want added to your library automatically.
 
 ### SLSKD
 
-[SLSKD](https://github.com/slskd/slskd) is a modern Soulseek client. When integrated, you can search for and download individual missing tracks.
-
-{: .note }
-Real-time P2P searches take longer than other lookups - approximately 40 seconds per song.
+[SLSKD](https://github.com/slskd/slskd) can search and download individual missing tracks, but peer-to-peer searches are slower than direct API lookups.
 
 ### Tidal
 
-With Tidal credentials configured, you can match missing songs with Tidal to find alternatives or verify track availability.
+Tidal matching helps verify whether a missing song exists on another catalog and generates export files you can use elsewhere.
 
 ### MQTT / Home Assistant
 
-Publish your categorized playlists and albums to Home Assistant via MQTT. This enables smart home scenarios like "play a random jazz playlist".
-
-{: .note }
-This is a specialized feature for home automation. It requires you to assign categories (labels) to your saved items.
+MQTT publishing exposes labeled playlists and albums to Home Assistant for automation-driven playback.

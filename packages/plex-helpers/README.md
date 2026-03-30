@@ -1,6 +1,6 @@
-# @spotify-to-plex/plex-helpers
+# @youtube-to-plex/plex-helpers
 
-Shared Plex helper functions for Spotify to Plex sync operations.
+Shared Plex helper functions for YouTube Music to Plex sync operations.
 
 ## Overview
 
@@ -33,7 +33,7 @@ export async function addItemsToPlaylist(id: string, items: { key: string; sourc
 ### After (Modern)
 ```typescript
 // Settings passed as parameters
-import { addItemsToPlaylistWithSettings, PlexSettings } from '@spotify-to-plex/plex-helpers';
+import { addItemsToPlaylistWithSettings, PlexSettings } from '@youtube-to-plex/plex-helpers';
 
 export async function addItemsToPlaylist(
     settings: PlexSettings,
@@ -84,11 +84,11 @@ Convenience wrapper functions are available for simpler usage:
 
 ```typescript
 // Simple convenience function
-import { addItemsToPlaylist } from '@spotify-to-plex/plex-helpers';
+import { addItemsToPlaylist } from '@youtube-to-plex/plex-helpers';
 await addItemsToPlaylist(playlistId, items);
 
 // Modern recommended approach  
-import { addItemsToPlaylistWithSettings } from '@spotify-to-plex/plex-helpers';
+import { addItemsToPlaylistWithSettings } from '@youtube-to-plex/plex-helpers';
 await addItemsToPlaylistWithSettings(settings, playlistId, items);
 ```
 
@@ -105,7 +105,7 @@ await addItemsToPlaylistWithSettings(settings, playlistId, items);
 
 ### Web App (`apps/web`)
 ```typescript
-import { storePlaylistWithSettings } from '@spotify-to-plex/plex-helpers';
+import { storePlaylistWithSettings } from '@youtube-to-plex/plex-helpers';
 import { plex } from '@/library/plex';
 import getAPIUrl from '@/helpers/getAPIUrl';
 
@@ -115,7 +115,7 @@ const playlistId = await storePlaylistWithSettings(plex.settings, getAPIUrl, nam
 
 ### Sync Worker (`apps/sync-worker`) 
 ```typescript
-import { addItemsToPlaylistWithSettings } from '@spotify-to-plex/plex-helpers';
+import { addItemsToPlaylistWithSettings } from '@youtube-to-plex/plex-helpers';
 import { plex } from '../../library/plex';
 import getAPIUrl from '../getAPIUrl';
 

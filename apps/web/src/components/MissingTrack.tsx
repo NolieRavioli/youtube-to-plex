@@ -1,6 +1,6 @@
 import { GetTidalTracksResponse } from "@/pages/api/tidal";
 import { Alert, Box, Button, Divider, Typography } from "@mui/material";
-import { Track } from "@spotify-to-plex/shared-types/spotify/Track";
+import { Track } from "@youtube-to-plex/shared-types/youtube-music/Track";
 import axios from "axios";
 import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
 
@@ -216,10 +216,11 @@ const MissingTrack = forwardRef<MissingTrackHandle, MissingTrackProps>((props, r
     }, [sendToSlskd]);
 
 
-    const spotifyId = useMemo(()=>{
+    const youTubeMusicId = useMemo(() => {
         if (!track.id) return null;
+        if (track.id.startsWith('ytmusic-missing::')) return null;
 
-        return track.id.replace('spotify:track:', '');
+        return track.id.replace('ytmusic:track:', '');
     }, [track.id]);
 
     return (
@@ -282,12 +283,11 @@ const MissingTrack = forwardRef<MissingTrackHandle, MissingTrackProps>((props, r
                         </Box>
                     )}
 
-                    {/* Spotify Button */}
-                    {!!spotifyId && 
+                    {!!youTubeMusicId &&
                         <Box>
                             <Button
                                 component="a"
-                                href={`https://open.spotify.com/track/${spotifyId}`}
+                                href={`https://music.youtube.com/watch?v=${youTubeMusicId}`}
                                 target="_blank"
                                 className="btn"
                                 color="inherit"
@@ -295,7 +295,7 @@ const MissingTrack = forwardRef<MissingTrackHandle, MissingTrackProps>((props, r
                                 size="small"
                                 sx={{ fontSize: '.8em' }}
                             >
-                                Spotify
+                                YouTube Music
                             </Button>
                         </Box>
                     }

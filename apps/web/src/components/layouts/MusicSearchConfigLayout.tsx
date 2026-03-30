@@ -9,7 +9,7 @@ import { useRouter } from "next/router"
 import { enqueueSnackbar } from "notistack"
 import { ReactNode, useCallback, useRef, useState } from "react"
 import { errorBoundary } from "@/helpers/errors/errorBoundary"
-import SpotifyNavigation from "../SpotifyNavigation"
+import MusicNavigation from "../MusicNavigation"
 
 type MusicSearchConfigLayoutProps = {
     readonly children: ReactNode
@@ -147,18 +147,18 @@ const MusicSearchConfigLayout = (props: MusicSearchConfigLayoutProps) => {
     return (
         <>
             <Head>
-                <title>{`${String(title)} - Spotify to Plex`}</title>
+                <title>{`${String(title)} - YouTube Music to Plex`}</title>
             </Head>
             <MainLayout maxWidth="1200px">
                 <Container>
                     <Logo />
-                    <SpotifyNavigation />
+                    <MusicNavigation />
                     <Paper elevation={0} sx={{ p: 2, bgcolor: "action.hover", mb: 3 }}>
                         <Typography variant="h4" sx={{ mt: 2, mb: 0.5 }}>
                             Music Search Configuration
                         </Typography>
                         <Typography variant="body1" sx={{ mb: 2, maxWidth: 600 }}>
-                            Configure how the system matches songs between Spotify and Plex. Use the &ldquo;How It Works&rdquo; tab
+                            Configure how the system matches songs between YouTube Music and Plex. Use the &ldquo;How It Works&rdquo; tab
                             to understand the system, then configure your settings and test them immediately.
                         </Typography>
 

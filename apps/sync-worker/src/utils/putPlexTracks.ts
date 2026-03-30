@@ -1,13 +1,13 @@
-import { addItemsToPlaylist } from "@spotify-to-plex/plex-helpers/playlist/addItemsToPlaylist";
-import { putPlaylistPoster } from "@spotify-to-plex/plex-helpers/playlist/putPlaylistPoster";
-import { removeItemsFromPlaylist } from "@spotify-to-plex/plex-helpers/playlist/removeItemsFromPlaylist";
-import { storePlaylist } from "@spotify-to-plex/plex-helpers/playlist/storePlaylist";
-import { updatePlaylist } from "@spotify-to-plex/plex-helpers/playlist/updatePlaylist";
-import { getPlexUri } from "@spotify-to-plex/plex-helpers/utils/getPlexUri";
-import { Playlist } from "@spotify-to-plex/shared-types/plex/Playlist";
-import { SearchResponse } from "@spotify-to-plex/plex-music-search/types/SearchResponse";
-import { getSettings } from "@spotify-to-plex/plex-config/functions/getSettings";
-import { addPlaylist } from "@spotify-to-plex/plex-config/functions/addPlaylist";
+import { addItemsToPlaylist } from "@youtube-to-plex/plex-helpers/playlist/addItemsToPlaylist";
+import { putPlaylistPoster } from "@youtube-to-plex/plex-helpers/playlist/putPlaylistPoster";
+import { removeItemsFromPlaylist } from "@youtube-to-plex/plex-helpers/playlist/removeItemsFromPlaylist";
+import { storePlaylist } from "@youtube-to-plex/plex-helpers/playlist/storePlaylist";
+import { updatePlaylist } from "@youtube-to-plex/plex-helpers/playlist/updatePlaylist";
+import { getPlexUri } from "@youtube-to-plex/plex-helpers/utils/getPlexUri";
+import { Playlist } from "@youtube-to-plex/shared-types/plex/Playlist";
+import { SearchResponse } from "@youtube-to-plex/plex-music-search/types/SearchResponse";
+import { getSettings } from "@youtube-to-plex/plex-config/functions/getSettings";
+import { addPlaylist } from "@youtube-to-plex/plex-config/functions/addPlaylist";
 
 export async function putPlexPlaylist(id: string, plexPlaylist: Playlist | undefined | null, result: SearchResponse[], title: string, thumb: string) {
     const plexTracks = result.map(item => {

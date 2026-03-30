@@ -1,5 +1,5 @@
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
-import { SyncLogCollection } from "@spotify-to-plex/shared-types/common/sync";
+import { getStorageDir } from '@youtube-to-plex/shared-utils/utils/getStorageDir';
+import { SyncLogCollection } from "@youtube-to-plex/shared-types/common/sync";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 

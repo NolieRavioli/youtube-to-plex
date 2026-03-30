@@ -1,40 +1,62 @@
 /* eslint-disable @typescript-eslint/no-redundant-type-constituents */
 import { generateError } from '@/helpers/errors/generateError';
-import { getSpotifyData } from '@spotify-to-plex/shared-utils/spotify/getSpotifyData';
-import { getStorageDir } from '@spotify-to-plex/shared-utils/utils/getStorageDir';
-
-import type { SavedItem } from '@spotify-to-plex/shared-types/spotify/SavedItem';
-import type { SpotifyCredentials } from '@spotify-to-plex/shared-types/spotify/SpotifyCredentials';
-import { getById } from '@spotify-to-plex/plex-music-search/functions/getById';
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
-import { SpotifyApi } from '@spotify/web-api-ts-sdk';
+import { getById } from '@youtube-to-plex/plex-music-search/functions/getById';
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
+import { getSettings } from '@youtube-to-plex/plex-config/functions/getSettings';
+import { getDecryptedYouTubeMusicTokens, readYouTubeMusicUsers } from '@youtube-to-plex/shared-utils/youtube-music/credentials';
+import { resolveYouTubeMusicData } from '@youtube-to-plex/shared-utils/youtube-music/service';
+import { getYouTubeMusicSavedItemsPath } from '@youtube-to-plex/shared-utils/youtube-music/storage';
+import type { SavedItem } from '@youtube-to-plex/shared-types/youtube-music/SavedItem';
+import type { YouTubeMusicCredentials } from '@youtube-to-plex/shared-types/youtube-music/YouTubeMusicCredentials';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { parse } from 'node:url';
-import { getSettings } from '@spotify-to-plex/plex-config/functions/getSettings';
+
+function readSavedItems() {
+    const savedItemsPath = getYouTubeMusicSavedItemsPath();
+    if (!existsSync(savedItemsPath))
+        return [] as SavedItem[];
+
+    return JSON.parse(readFileSync(savedItemsPath, 'utf8')) as SavedItem[];
+}
+
+function writeSavedItems(items: SavedItem[]) {
+    writeFileSync(getYouTubeMusicSavedItemsPath(), JSON.stringify(items, undefined, 4));
+}
+
+function findUserByIdentifier(users: YouTubeMusicCredentials[], identifier: string) {
+    const normalized = identifier.trim().toLowerCase();
+    return users.find(credential => {
+        const { name, email } = credential.user;
+        return name.toLowerCase() === normalized || email?.toLowerCase() === normalized;
+    });
+}
+
+function normalizeSource(type: SavedItem['type'], id: string, userId?: string) {
+    switch (type) {
+        case 'youtube-music-album':
+            return `ytmusic:album:${id}`;
+        case 'youtube-music-liked':
+            return `ytmusic:liked:${userId || id.replace(/^liked-/, '')}`;
+        default:
+            return `ytmusic:playlist:${id}`;
+    }
+}
 
 const router = createRouter<NextApiRequest, NextApiResponse>()
     .get(
         async (req, res) => {
-
-            const savedItemsPath = join(getStorageDir(), 'spotify_saved_items.json')
-            if (!existsSync(savedItemsPath))
-                return res.status(200).json([])
-
-            const savedItems: SavedItem[] = JSON.parse(readFileSync(savedItemsPath, 'utf8'))
-
+            const savedItems = readSavedItems();
             const { id } = req.query;
             if (typeof id === 'string') {
-                const savedItem = savedItems.find(item => item.id === id)
+                const savedItem = savedItems.find(item => item.id === id);
                 if (!savedItem)
-                    throw new Error(`Saved item not found ${id}`)
+                    throw new Error(`Saved item not found ${id}`);
 
-                return res.status(200).json([savedItem])
+                return res.status(200).json([savedItem]);
             }
 
-            return res.status(200).json(savedItems.reverse())
+            return res.status(200).json(savedItems.reverse());
         }
     )
     .post(
@@ -42,204 +64,169 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
             try {
                 const { search, user_id, label } = req.body;
                 if (typeof search !== 'string')
-                    return res.status(400).json({ error: "Search query missing" })
+                    return res.status(400).json({ error: "Search query missing" });
 
-                if (!process.env.SPOTIFY_API_CLIENT_ID || !process.env.SPOTIFY_API_CLIENT_SECRET)
-                    return res.status(400).json({ error: "Spotify Credentials missing. Please add the environment variables to use this feature." })
-
+                const trimmedSearch = search.trim();
                 let savedItem: SavedItem | null = null;
-                if (typeof search === 'string' && search.trim().startsWith('/library')) {
-                    const plexMediaId = search.trim();
 
+                if (trimmedSearch.startsWith('/library')) {
+                    const plexMediaId = trimmedSearch;
                     const settings = await getSettings();
-
                     if (!settings.token || !settings.uri)
                         return res.status(400).json({ msg: "Plex not configured" });
 
                     const musicSearchConfig = await getMusicSearchConfig();
-
                     const plexConfig = {
                         uri: settings.uri,
                         token: settings.token,
                         musicSearchConfig
                     };
 
-                    const metaData = await getById(plexConfig, plexMediaId)
-                    if (metaData)
-                        savedItem = { type: 'plex-media', uri: metaData.id, id: metaData.guid, title: metaData.title, image: `/api/plex/image?path=${encodeURIComponent(metaData.image)}` }
-                } else if (search.includes(':liked')) {
-                    // Handle {username}:liked pattern
-                    const parts = search.trim().split(':');
+                    const metaData = await getById(plexConfig, plexMediaId);
+                    if (metaData) {
+                        savedItem = {
+                            type: 'plex-media',
+                            uri: metaData.id,
+                            id: metaData.guid,
+                            title: metaData.title,
+                            image: `/api/plex/image?path=${encodeURIComponent(metaData.image)}`
+                        };
+                    }
+                } else if (trimmedSearch === 'liked' || trimmedSearch === 'liked-songs' || trimmedSearch.endsWith(':liked') || trimmedSearch.startsWith('ytmusic:liked:')) {
+                    const users = readYouTubeMusicUsers();
+                    if (users.length === 0)
+                        return res.status(400).json({ error: "No YouTube Music users are connected. Connect a user first to add liked songs." });
 
-                    // Validate format is exactly {username}:liked
-                    if (parts.length !== 2 || parts[1]?.toLowerCase() !== 'liked') 
-                        return res.status(400).json({ error: "Invalid format. Expected: {username}:liked" });
+                    let matchedUser: YouTubeMusicCredentials | undefined;
+                    if (typeof user_id === 'string')
+                        matchedUser = users.find(item => item.user.id === user_id);
 
-                    const [username] = parts;
-                    if (!username) 
-                        return res.status(400).json({ error: "Username cannot be empty. Expected: {username}:liked" });
-
-                    // Load spotify.json to validate username
-                    const credentialsPath = join(getStorageDir(), 'spotify.json');
-                    if (!existsSync(credentialsPath)) 
-                        return res.status(400).json({ error: "No Spotify users are currently connected. Please connect a Spotify account first." });
-
-                    const users: SpotifyCredentials[] = JSON.parse(readFileSync(credentialsPath, 'utf8'));
-
-                    // Find user by name (case-insensitive)
-                    const matchedUser = users.find(cred =>
-                        cred.user.name.toLowerCase() === username.toLowerCase()
-                    );
-
-                    if (!matchedUser) {
-                        const availableUsernames = users.map(cred => cred.user.name).join(', ');
-
-                        return res.status(400).json({
-                            error: `Username "${username}" not found. Available usernames: ${availableUsernames}`
-                        });
+                    if (!matchedUser && trimmedSearch.startsWith('ytmusic:liked:')) {
+                        const internalUserId = trimmedSearch.slice('ytmusic:liked:'.length).trim();
+                        matchedUser = users.find(item => item.user.id === internalUserId);
                     }
 
-                    // Create SavedItem with synthetic URI
-                    const userId = matchedUser.user.id;
+                    if (!matchedUser && trimmedSearch.endsWith(':liked')) {
+                        const identifier = trimmedSearch.slice(0, -':liked'.length);
+                        matchedUser = findUserByIdentifier(users, identifier);
+                    }
+
+                    if (!matchedUser && (trimmedSearch === 'liked' || trimmedSearch === 'liked-songs')) {
+                        if (users.length !== 1)
+                            return res.status(400).json({ error: "Multiple users are connected. Select liked songs from the Users page or specify {email}:liked." });
+
+                        matchedUser = users[0];
+                    }
+
+                    if (!matchedUser)
+                        return res.status(400).json({ error: "Connected YouTube Music user not found for liked songs import." });
+
                     savedItem = {
-                        type: 'spotify-playlist',
-                        uri: `spotify:liked:${userId}`,
-                        id: `liked-${userId}`,
-                        title: label && typeof label === 'string' ? label : 'Liked Songs',
-                        image: ''
+                        type: 'youtube-music-liked',
+                        uri: `ytmusic:liked:${matchedUser.user.id}`,
+                        id: `liked-${matchedUser.user.id}`,
+                        title: 'Liked Songs',
+                        image: matchedUser.user.picture || '',
+                        user: matchedUser.user.id
+                    };
+                } else {
+                    const token = typeof user_id === 'string' ? getDecryptedYouTubeMusicTokens(user_id) : undefined;
+                    const user = typeof user_id === 'string'
+                        ? readYouTubeMusicUsers().find(item => item.user.id === user_id)
+                        : undefined;
+
+                    const data = await resolveYouTubeMusicData({
+                        source: trimmedSearch,
+                        simplified: true,
+                        token,
+                        user_id,
+                        user_name: user?.user.name
+                    });
+
+                    savedItem = {
+                        type: data.type as SavedItem['type'],
+                        uri: normalizeSource(data.type as SavedItem['type'], data.id, user_id),
+                        id: data.id,
+                        title: data.title,
+                        image: data.image
                     };
 
                     if (typeof user_id === 'string')
                         savedItem.user = user_id;
-
-                    if (typeof label === 'string')
-                        savedItem.label = label;
-                } else {
-                    let id = '';
-
-                    if (search.indexOf('http') > -1) {
-
-                        const { path } = parse(search, true);
-
-                        if (!path)
-                            return res.status(400).json({ error: "Invalid URL" });
-
-                        id = path.split("/").join(":");
-                        id = `spotify${id}`;
-                    } else if (search.split(":").length === 3) {
-                        id = search;
-                    } else {
-                        return res.status(400).json({ error: "Invalid Spotify URI, expecting spotify:playlist:id" });
-                    }
-
-                    const api = SpotifyApi.withClientCredentials(process.env.SPOTIFY_API_CLIENT_ID, process.env.SPOTIFY_API_CLIENT_SECRET);
-                    const data = await getSpotifyData(api, id, true)
-                    if (!data)
-                        return res.status(400).json({ error: "No datas found, it might be a private playlist" })
-
-                    const { type, id: resultId, title: name, image } = data;
-
-                    // @ts-ignore
-                    savedItem = { type, uri: id, id: resultId, title: name, image }
-                    if (typeof user_id === 'string')
-                        // @ts-ignore
-                        savedItem.user = user_id;
-
-                    if (typeof label === 'string')
-                        // @ts-ignore
-                        savedItem.label = label;
-
                 }
 
                 if (!savedItem)
-                    return res.status(400).json({ error: "Could not find data to save" })
+                    return res.status(400).json({ error: "Could not find data to save" });
 
-                const savedItemsPath = join(getStorageDir(), 'spotify_saved_items.json')
-                if (existsSync(savedItemsPath)) {
+                if (typeof label === 'string')
+                    savedItem.label = label;
 
-                    const savedItems: SavedItem[] = JSON.parse(readFileSync(savedItemsPath, 'utf8'))
-                    if (savedItems.some(item => item.id === savedItem.id))
-                        return res.status(400).json({ error: `${savedItem.title} (spotify id: ${savedItem.id}) is already added.` })
+                const savedItems = readSavedItems();
+                if (savedItems.some(item => item.id === savedItem.id))
+                    return res.status(400).json({ error: `${savedItem.title} (id: ${savedItem.id}) is already added.` });
 
-                    savedItems.push(savedItem)
-                    writeFileSync(savedItemsPath, JSON.stringify(savedItems, undefined, 4))
-                } else {
-                    writeFileSync(savedItemsPath, JSON.stringify([savedItem], undefined, 4))
-                }
+                savedItems.push(savedItem);
+                writeSavedItems(savedItems);
 
-                const savedItems: SavedItem[] = JSON.parse(readFileSync(savedItemsPath, 'utf8'))
-
-                return res.status(200).json(savedItems.reverse())
+                return res.status(200).json(savedItems.reverse());
             } catch (error: any) {
-
-                const message = error.message || 'Failed to save items'
-                res.status(500).json({ error: message });
+                const message = error.message || 'Failed to save items';
+                return res.status(500).json({ error: message });
             }
-        })
+        }
+    )
     .delete(
         async (req, res) => {
+            const savedItems = readSavedItems();
+            if (savedItems.length === 0)
+                return res.status(400).json({ error: 'No items found' });
 
-            const savedItemsPath = join(getStorageDir(), 'spotify_saved_items.json')
-            if (!existsSync(savedItemsPath))
-                return res.status(400).json({ error: `No items found` })
-
-            const { id } = req.query
+            const { id } = req.query;
             if (typeof id !== 'string')
-                return res.status(400).json({ error: `ID expected but none found` })
+                return res.status(400).json({ error: 'ID expected but none found' });
 
-            let savedItems: SavedItem[] = JSON.parse(readFileSync(savedItemsPath, 'utf8'))
             if (!savedItems.some(item => item.id === id))
-                return res.status(400).json({ error: `Item not found` })
+                return res.status(400).json({ error: 'Item not found' });
 
-
-            // Change the imtes
-            savedItems = savedItems.filter(item => item.id !== id)
-            writeFileSync(savedItemsPath, JSON.stringify(savedItems, undefined, 4))
-
-            return res.status(200).json(savedItems.reverse())
+            const updatedItems = savedItems.filter(item => item.id !== id);
+            writeSavedItems(updatedItems);
+            return res.status(200).json(updatedItems.reverse());
         }
     )
     .put(
         async (req, res) => {
+            const savedItems = readSavedItems();
+            if (savedItems.length === 0)
+                return res.status(400).json({ error: 'No items found' });
 
-            const savedItemsPath = join(getStorageDir(), 'spotify_saved_items.json')
-            if (!existsSync(savedItemsPath))
-                return res.status(400).json({ error: `No items found` })
-
-            const { ids, label, sync, sync_interval, title } = req.body
+            const { ids, label, sync, sync_interval, title } = req.body;
             if (!Array.isArray(ids))
-                return res.status(400).json({ error: `Mutliple ids expected as an array` })
-
-            const savedItems: SavedItem[] = JSON.parse(readFileSync(savedItemsPath, 'utf8'))
+                return res.status(400).json({ error: 'Multiple ids expected as an array' });
 
             for (let i = 0; i < ids.length; i++) {
-                const saveItem = savedItems.find(item => item.id === ids[i])
-                if (!saveItem)
-                    return res.status(400).json({ error: `Item not found` })
+                const savedItem = savedItems.find(item => item.id === ids[i]);
+                if (!savedItem)
+                    return res.status(400).json({ error: 'Item not found' });
 
                 if (typeof sync === 'boolean' && typeof sync_interval === 'string') {
-                    saveItem.sync = sync
-                    saveItem.sync_interval = sync_interval
+                    savedItem.sync = sync;
+                    savedItem.sync_interval = sync_interval;
                 }
 
                 if (typeof label === 'string')
-                    saveItem.label = label;
+                    savedItem.label = label;
 
                 if (typeof title === 'string')
-                    saveItem.title = title;
+                    savedItem.title = title;
             }
 
-            // Change the imtes
-            writeFileSync(savedItemsPath, JSON.stringify(savedItems, undefined, 4))
-
-            return res.status(200).json(savedItems.reverse())
+            writeSavedItems(savedItems);
+            return res.status(200).json(savedItems.reverse());
         }
-    )
+    );
 
 export default router.handler({
     onError: (err: unknown, req: NextApiRequest, res: NextApiResponse) => {
-        generateError(req, res, "Spotify import", err);
+        generateError(req, res, "Saved items", err);
     },
 });
-
-

@@ -1,18 +1,12 @@
-title: Spotify to Plex
-description: Sync your Spotify playlists with Plex
+title: YouTube Music to Plex
+description: Sync your YouTube Music playlists with Plex
 theme: just-the-docs
-url: https://jjdenhertog.github.io
-baseurl: /spotify-to-plex
 
 # Logo in the header
 logo: /assets/images/logo.png
 
-# Aux links in header
-aux_links:
-  GitHub: https://github.com/jjdenhertog/spotify-to-plex
-
 # Footer
-footer_content: "Made with ❤️ - <a href=\"https://www.buymeacoffee.com/jjdenhertog\">Support this project</a>"
+footer_content: "Support the project: <a href=\"https://www.buymeacoffee.com/jjdenhertog\">Buy Me a Coffee</a>"
 
 # Enable search
 search_enabled: true
@@ -20,7 +14,7 @@ search_enabled: true
 # Color scheme
 color_scheme: dark
 
-# Exclude from Jekyll processing (keep callback.html, just exclude from nav via front matter)
+# Exclude from Jekyll processing
 exclude:
   - Gemfile
   - Gemfile.lock

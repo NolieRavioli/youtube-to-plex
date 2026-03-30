@@ -1,6 +1,6 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getLidarrSettings } from '@spotify-to-plex/plex-config/functions/getLidarrSettings';
-import { updateLidarrSettings } from '@spotify-to-plex/plex-config/functions/updateLidarrSettings';
+import { getLidarrSettings } from '@youtube-to-plex/plex-config/functions/getLidarrSettings';
+import { updateLidarrSettings } from '@youtube-to-plex/plex-config/functions/updateLidarrSettings';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 

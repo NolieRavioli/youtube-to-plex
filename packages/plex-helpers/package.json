@@ -1,7 +1,7 @@
 {
-    "name": "@spotify-to-plex/plex-helpers",
+    "name": "@youtube-to-plex/plex-helpers",
     "version": "1.0.0",
-    "description": "Shared Plex helper functions for Spotify to Plex sync",
+    "description": "Shared Plex helper functions for YouTube Music to Plex sync",
     "scripts": {
         "build": "tsc",
         "dev": "tsc --watch",
@@ -11,10 +11,10 @@
         "lint:fix": "eslint src --fix"
     },
     "dependencies": {
-        "@spotify-to-plex/http-client": "workspace:*",
-        "@spotify-to-plex/plex-config": "workspace:*",
-        "@spotify-to-plex/shared-types": "workspace:*",
-        "@spotify-to-plex/shared-utils": "workspace:*",
+        "@youtube-to-plex/http-client": "workspace:*",
+        "@youtube-to-plex/plex-config": "workspace:*",
+        "@youtube-to-plex/shared-types": "workspace:*",
+        "@youtube-to-plex/shared-utils": "workspace:*",
         "axios": "^1.0.0"
     },
     "devDependencies": {

@@ -5,126 +5,112 @@ nav_order: 2
 
 # Installation
 
-Install the Spotify-to-Plex app using a Docker container. Once up and running you will find the instance at `http://[ipaddress]:9030`. You can change the port number by setting the `PORT` environment variable.
+Build and run the app with Docker. Once it is up, the web UI is available at `http://[ipaddress]:9030`.
 
 ---
 
 ## Prerequisites
 
-Before you begin, you'll need:
+Before you begin, you need:
 
-### 1. Encryption Key (required for Spotify user integration)
+### 1. Encryption Key
 
 ```bash
 openssl rand -hex 32
 ```
 
-### 2. Spotify API Credentials
+### 2. Google OAuth Credentials
 
-Get them from the [Spotify Developer site](https://developer.spotify.com/). See the [Spotify App Configuration](spotify/app-setup) guide for detailed instructions.
+Create a Google Cloud OAuth web application. A YouTube Data API key alone is not enough for private playlists, liked songs, or library albums.
+
+Recommended local redirect URI:
+
+```text
+http://127.0.0.1:9030/api/youtube-music/token
+```
+
+See the [YouTube Music setup](youtube-music/) section for the full OAuth flow.
 
 ### 3. Tidal API Credentials (optional)
 
 For matching missing songs with Tidal:
 - Register at the [Tidal Developer Portal](https://developer.tidal.com/)
-- Only client credentials (Client ID and Secret) are needed - no OAuth flow required
+- Only client credentials are needed
 
 ### 4. Lidarr API Key (optional)
 
 For automatic album downloads:
-- Find it in Lidarr under Settings → General → Security → API Key
+- Find it in Lidarr under Settings > General > Security > API Key
 
 ### 5. SLSKD API Key (optional)
 
-For P2P downloads from Soulseek:
-- Generate using: `openssl rand -base64 48`
-- Configure in your SLSKD instance's `slskd.yml` file
+For peer-to-peer downloads from Soulseek:
+- Generate one with `openssl rand -base64 48`
 
 ---
 
 ## Docker Installation
 
 ```sh
+docker build -t youtube-music-to-plex .
+
 docker run -d \
+    --name=youtube-music-to-plex \
+    -p 9030:9030 \
+    -v /local/directory:/app/config \
     -e PORT=9030 \
-    -e SPOTIFY_API_CLIENT_ID=YOUR_CLIENT_ID \
-    -e SPOTIFY_API_CLIENT_SECRET=YOUR_CLIENT_SECRET \
-    -e SPOTIFY_API_REDIRECT_URI=https://jjdenhertog.github.io/spotify-to-plex/callback.html \
+    -e GOOGLE_OAUTH_CLIENT_ID=YOUR_CLIENT_ID \
+    -e GOOGLE_OAUTH_CLIENT_SECRET=YOUR_CLIENT_SECRET \
+    -e GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:9030/api/youtube-music/token \
     -e ENCRYPTION_KEY=YOUR_ENCRYPTION_KEY \
     -e PLEX_APP_ID=eXf+f9ktw3CZ8i45OY468WxriOCtoFxuNPzVeDcAwfw= \
-    -v /local/directory/:/app/config:rw \
-    --name=spotify-to-plex \
-    --network=host \
-    --restart on-failure:4 \
-    jjdenhertog/spotify-to-plex
+    youtube-music-to-plex
 ```
 
 {: .note }
-All data is stored in `/app/config` - make sure to mount this as a volume for persistent storage.
+All persistent data is stored in `/app/config`.
 
 ### Optional Environment Variables
 
 ```sh
-    -e TIDAL_API_CLIENT_ID=YOUR_TIDAL_CLIENT_ID \
-    -e TIDAL_API_CLIENT_SECRET=YOUR_TIDAL_CLIENT_SECRET \
-    -e LIDARR_API_KEY=YOUR_LIDARR_API_KEY \
-    -e SLSKD_API_KEY=YOUR_SLSKD_API_KEY \
+-e TIDAL_API_CLIENT_ID=YOUR_TIDAL_CLIENT_ID \
+-e TIDAL_API_CLIENT_SECRET=YOUR_TIDAL_CLIENT_SECRET \
+-e LIDARR_API_KEY=YOUR_LIDARR_API_KEY \
+-e SLSKD_API_KEY=YOUR_SLSKD_API_KEY \
+-e MQTT_BROKER_URL=mqtt://YOUR_BROKER:1883
 ```
 
 ---
 
-## Portainer Installation
-
-Create a new stack with the following configuration:
+## Docker Compose / Portainer
 
 ```yaml
 services:
-    spotify-to-plex:
-        container_name: spotify-to-plex
-        restart: unless-stopped
-        volumes:
-            - '/local/directory:/app/config'
-        environment:
-            - PORT=9030
-            - SPOTIFY_API_CLIENT_ID=YOUR_CLIENT_ID
-            - SPOTIFY_API_CLIENT_SECRET=YOUR_CLIENT_SECRET
-            - SPOTIFY_API_REDIRECT_URI=https://jjdenhertog.github.io/spotify-to-plex/callback.html
-            - ENCRYPTION_KEY=YOUR_ENCRYPTION_KEY
-            - PLEX_APP_ID=eXf+f9ktw3CZ8i45OY468WxriOCtoFxuNPzVeDcAwfw=
-        network_mode: "host"
-        image: 'jjdenhertog/spotify-to-plex:latest'
-```
-
-Add optional integrations as needed:
-
-```yaml
-            - TIDAL_API_CLIENT_ID=YOUR_TIDAL_CLIENT_ID
-            - TIDAL_API_CLIENT_SECRET=YOUR_TIDAL_CLIENT_SECRET
-            - LIDARR_API_KEY=YOUR_LIDARR_API_KEY
-            - SLSKD_API_KEY=YOUR_SLSKD_API_KEY
+  youtube-music-to-plex:
+    container_name: youtube-music-to-plex
+    restart: unless-stopped
+    build: .
+    ports:
+      - "9030:9030"
+    volumes:
+      - /local/directory:/app/config
+    environment:
+      - PORT=9030
+      - GOOGLE_OAUTH_CLIENT_ID=YOUR_CLIENT_ID
+      - GOOGLE_OAUTH_CLIENT_SECRET=YOUR_CLIENT_SECRET
+      - GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:9030/api/youtube-music/token
+      - ENCRYPTION_KEY=YOUR_ENCRYPTION_KEY
+      - PLEX_APP_ID=eXf+f9ktw3CZ8i45OY468WxriOCtoFxuNPzVeDcAwfw=
 ```
 
 ---
 
-## Unraid Installation
+## Redirect URI Notes
 
-Install from the Community Applications (CA) store by searching for "spotify-to-plex".
+Google requires exact redirect URI matching. The simplest setup is a direct loopback callback:
 
-{: .important }
-The Unraid template from CA does **not** include the Lidarr and SLSKD environment variables by default. You must add these manually if you want to use those integrations.
+```text
+http://127.0.0.1:9030/api/youtube-music/token
+```
 
-### Adding Environment Variables in Unraid
-
-1. Go to the Docker tab in Unraid
-2. Click on the Spotify-to-Plex container
-3. Select **Edit**
-4. Click **+ Add another Path, Port, Variable, Label or Device**
-5. Configure as follows:
-   - **Config Type:** Variable
-   - **Name:** SLSKD API Key (or any descriptive name)
-   - **Key:** `SLSKD_API_KEY`
-   - **Value:** Your generated API key
-6. Repeat for `LIDARR_API_KEY` if needed
-7. Click **Apply**
-
-See the [Lidarr Integration](integrations/lidarr) and [SLSKD Integration](integrations/slskd) pages for details on generating API keys and configuring these integrations.
+If you need a relay page for a LAN deployment, publish the repository's `docs/callback.html` file on an HTTPS origin you control and register that exact URL in Google Cloud.

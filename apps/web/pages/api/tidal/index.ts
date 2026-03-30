@@ -1,12 +1,12 @@
 import { generateError } from '@/helpers/errors/generateError';
-import { getCachedTrackLinks } from '@spotify-to-plex/shared-utils/cache/getCachedTrackLink';
-import { Album } from '@spotify-to-plex/shared-types/spotify/Album';
-import { Track } from '@spotify-to-plex/shared-types/spotify/Track';
-import { search as tidalMusicSearch } from '@spotify-to-plex/tidal-music-search/functions/search';
-import { searchAlbum } from '@spotify-to-plex/tidal-music-search/functions/searchAlbum';
-import { setCredentials } from '@spotify-to-plex/tidal-music-search/session/credentials';
-import { SearchResponse } from '@spotify-to-plex/tidal-music-search/types/SearchResponse';
-import { getMusicSearchConfig } from "@spotify-to-plex/music-search/functions/getMusicSearchConfig";
+import { getCachedTrackLinks } from '@youtube-to-plex/shared-utils/cache/getCachedTrackLink';
+import { GetYouTubeMusicAlbum as Album } from '@youtube-to-plex/shared-types/youtube-music/GetYouTubeMusicAlbum';
+import { Track } from '@youtube-to-plex/shared-types/youtube-music/Track';
+import { search as tidalMusicSearch } from '@youtube-to-plex/tidal-music-search/functions/search';
+import { searchAlbum } from '@youtube-to-plex/tidal-music-search/functions/searchAlbum';
+import { setCredentials } from '@youtube-to-plex/tidal-music-search/session/credentials';
+import { SearchResponse } from '@youtube-to-plex/tidal-music-search/types/SearchResponse';
+import { getMusicSearchConfig } from "@youtube-to-plex/music-search/functions/getMusicSearchConfig";
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 
@@ -24,7 +24,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
 
             const searchItems: Track[] = req.body.items
             const album: Album = req.body.album
-            const { type = 'spotify-playlist' } = req.body;
+            const { type = 'youtube-music-playlist' } = req.body;
 
             if (!Array.isArray(searchItems))
                 throw new Error(`Array of items expected, none found`)
@@ -62,7 +62,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
             //////////////////////////////////////
             let searchResult: SearchResponse[] = []
             switch (type) {
-                case "spotify-album":
+                case "youtube-music-album":
                     searchResult = await searchAlbum(tidalConfig, searchItems)
                     break;
 
