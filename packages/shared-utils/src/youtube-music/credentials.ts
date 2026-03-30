@@ -33,12 +33,25 @@ export function getDecryptedYouTubeMusicTokens(userId: string): DecryptedYouTube
     if (!user)
         return undefined;
 
-    return {
-        access_token: decrypt(user.access_token.access_token),
-        refresh_token: decrypt(user.access_token.refresh_token),
-        expires_in: user.access_token.expires_in,
-        token_type: user.access_token.token_type,
-        scope: user.access_token.scope,
-        expires_at: user.expires_at
-    };
+    try {
+        return {
+            access_token: decrypt(user.access_token.access_token),
+            refresh_token: decrypt(user.access_token.refresh_token),
+            expires_in: user.access_token.expires_in,
+            token_type: user.access_token.token_type,
+            scope: user.access_token.scope,
+            expires_at: user.expires_at
+        };
+    } catch (error) {
+        const message = error instanceof Error && error.message
+            ? error.message
+            : 'Unknown decryption error';
+
+        throw new Error(
+            `Stored YouTube Music credentials could not be decrypted for this user. ` +
+            `The configured ENCRYPTION_KEY is invalid or does not match the key that was used when the account was connected. ` +
+            `Restore the previous ENCRYPTION_KEY or remove and reconnect this user. ` +
+            `Underlying error: ${message}`
+        );
+    }
 }
