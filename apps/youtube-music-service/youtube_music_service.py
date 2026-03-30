@@ -1,79 +1,305 @@
 #!/usr/bin/env python3
 """
-YouTube Music service backed by ytmusicapi.
+YouTube Music service.
+
+Uses the official YouTube Data API v3 for authenticated operations (library
+browsing, liked songs) because ytmusicapi's OAuth + WEB_REMIX client has been
+broken since August 2025 (see https://github.com/sigma67/ytmusicapi/issues/813).
+
+Non-authenticated operations (public playlists, albums, track metadata) still
+use ytmusicapi which works fine without OAuth.
 """
 
 from __future__ import annotations
 
 import logging
 import os
+import time
 from typing import Any
 from urllib.parse import parse_qs, urlparse
 
-from ytmusicapi import OAuthCredentials, YTMusic
-from ytmusicapi.constants import OAUTH_SCOPE
+import requests as http_client
+from ytmusicapi import YTMusic
 
 logger = logging.getLogger(__name__)
 
+# YouTube Data API v3
+YT_DATA_API = "https://www.googleapis.com/youtube/v3"
+
+# YouTube Music InnerTube API (used with TVHTML5 client for album browsing)
+INNERTUBE_API = "https://music.youtube.com/youtubei/v1"
+
+TVHTML5_CONTEXT = {
+    "client": {
+        "clientName": "TVHTML5",
+        "clientVersion": "7.0",
+        "hl": "en",
+        "gl": "US",
+    }
+}
+
 
 class YouTubeMusicService:
-    """Primary YouTube Music integration for the application."""
+    """YouTube Music integration using Data API v3 + ytmusicapi (non-auth)."""
 
     def __init__(self) -> None:
         self.client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID", "").strip()
         self.client_secret = os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", "").strip()
 
+    # ------------------------------------------------------------------
+    # Token management
+    # ------------------------------------------------------------------
+
     @staticmethod
-    def _normalize_expires(token: dict[str, Any]) -> tuple[int, int]:
-        """Return (expires_at_seconds, expires_in_seconds) from a token dict.
+    def _normalize_expires_at(token: dict[str, Any]) -> int:
+        """Return expires_at as Unix epoch seconds."""
+        raw = int(token.get("expires_at") or 0)
+        return raw // 1000 if raw > 1e12 else raw
 
-        The JS side may store expires_at in milliseconds (Date.now() based).
-        ytmusicapi expects Unix epoch seconds, so convert when needed.
-        """
-        import time
+    def _ensure_fresh_token(self, token: dict[str, Any]) -> str:
+        """Return a valid access_token, refreshing if it is about to expire."""
+        expires_at = self._normalize_expires_at(token)
+        if expires_at and expires_at - int(time.time()) < 60:
+            fresh = self._refresh_token(token["refresh_token"])
+            token["access_token"] = fresh
+        return token.get("access_token", "")
 
-        raw_at = int(token.get("expires_at") or 0)
-        # Heuristic: values above 1e12 are clearly milliseconds
-        expires_at = raw_at // 1000 if raw_at > 1e12 else raw_at
-        expires_in = max(0, expires_at - int(time.time())) if expires_at else 0
-        return expires_at, expires_in
+    def _refresh_token(self, refresh_token: str) -> str:
+        """Exchange a refresh_token for a new access_token."""
+        resp = http_client.post(
+            "https://oauth2.googleapis.com/token",
+            data={
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "refresh_token": refresh_token,
+                "grant_type": "refresh_token",
+            },
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        new_token = data.get("access_token")
+        if not new_token:
+            raise ValueError("Token refresh did not return an access_token.")
+        return new_token
 
-    def create_client(self, token: dict[str, Any] | None = None) -> YTMusic:
-        if token and token.get("refresh_token"):
-            if not self.client_id or not self.client_secret:
-                raise ValueError(
-                    "GOOGLE_OAUTH_CLIENT_ID and GOOGLE_OAUTH_CLIENT_SECRET are required for authenticated YouTube Music requests."
-                )
+    # ------------------------------------------------------------------
+    # YouTube Data API v3 helpers
+    # ------------------------------------------------------------------
 
-            expires_at, expires_in = self._normalize_expires(token)
+    def _yt_api_get(self, path: str, params: dict[str, str], token: dict[str, Any]) -> dict[str, Any]:
+        access_token = self._ensure_fresh_token(token)
+        resp = http_client.get(
+            f"{YT_DATA_API}/{path}",
+            params=params,
+            headers={"Authorization": f"Bearer {access_token}"},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return resp.json()
 
-            oauth_token = {
-                "access_token": token.get("access_token", ""),
-                "refresh_token": token["refresh_token"],
-                "expires_in": expires_in,
-                "expires_at": expires_at,
-                "token_type": token.get("token_type") or "Bearer",
-                "scope": token.get("scope") or OAUTH_SCOPE,
-            }
+    def _yt_api_get_all_pages(
+        self, path: str, base_params: dict[str, str], token: dict[str, Any], max_pages: int = 20
+    ) -> list[dict[str, Any]]:
+        """Paginate through a YouTube Data API v3 list endpoint."""
+        items: list[dict[str, Any]] = []
+        page_token: str | None = None
+        for _ in range(max_pages):
+            params = {**base_params}
+            if page_token:
+                params["pageToken"] = page_token
+            data = self._yt_api_get(path, params, token)
+            items.extend(data.get("items") or [])
+            page_token = data.get("nextPageToken")
+            if not page_token:
+                break
+        return items
 
-            return YTMusic(
-                oauth_token,
-                oauth_credentials=OAuthCredentials(self.client_id, self.client_secret),
-            )
+    # ------------------------------------------------------------------
+    # InnerTube TVHTML5 (for library albums — Data API has no equivalent)
+    # ------------------------------------------------------------------
 
+    def _innertube_browse(self, browse_id: str, token: dict[str, Any]) -> dict[str, Any]:
+        access_token = self._ensure_fresh_token(token)
+        body = {
+            "context": TVHTML5_CONTEXT,
+            "browseId": browse_id,
+        }
+        resp = http_client.post(
+            f"{INNERTUBE_API}/browse",
+            json=body,
+            headers={
+                "Authorization": f"Bearer {access_token}",
+                "Content-Type": "application/json",
+            },
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+    # ------------------------------------------------------------------
+    # Non-auth ytmusicapi client (public content only)
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _public_client() -> YTMusic:
         return YTMusic()
+
+    # ------------------------------------------------------------------
+    # Thumbnail helpers
+    # ------------------------------------------------------------------
 
     @staticmethod
     def _pick_image(item: dict[str, Any]) -> str:
         thumbnails = item.get("thumbnails") or item.get("images") or []
         if not thumbnails:
             return ""
-
         ordered = sorted(
             thumbnails,
             key=lambda entry: (entry.get("width", 0), entry.get("height", 0)),
         )
         return ordered[-1].get("url", "")
+
+    @staticmethod
+    def _pick_yt_thumbnail(thumbnails: dict[str, Any]) -> str:
+        """Pick best thumbnail from YouTube Data API v3 format."""
+        for size in ("high", "medium", "default"):
+            thumb = thumbnails.get(size)
+            if thumb and thumb.get("url"):
+                return thumb["url"]
+        return ""
+
+    # ------------------------------------------------------------------
+    # InnerTube TVHTML5 response parsing
+    # ------------------------------------------------------------------
+
+    def _parse_innertube_library_items(
+        self, data: dict[str, Any], item_type: str = "album"
+    ) -> list[dict[str, Any]]:
+        """Walk InnerTube TVHTML5 browse response to extract library items."""
+        results: list[dict[str, Any]] = []
+        self._walk_innertube_tree(data, results, item_type)
+
+        # Deduplicate by ID
+        seen: set[str] = set()
+        deduped: list[dict[str, Any]] = []
+        for item in results:
+            if item["id"] and item["id"] not in seen:
+                seen.add(item["id"])
+                deduped.append(item)
+        return deduped
+
+    def _walk_innertube_tree(
+        self, obj: Any, found: list[dict[str, Any]], item_type: str
+    ) -> None:
+        """Recursively walk JSON looking for items with browseId / playlistId."""
+        if isinstance(obj, dict):
+            # Check if this dict looks like a library item
+            item = self._try_extract_innertube_item(obj, item_type)
+            if item:
+                found.append(item)
+                return  # Don't recurse into already-extracted items
+
+            for value in obj.values():
+                self._walk_innertube_tree(value, found, item_type)
+        elif isinstance(obj, list):
+            for entry in obj:
+                self._walk_innertube_tree(entry, found, item_type)
+
+    def _try_extract_innertube_item(
+        self, obj: dict[str, Any], item_type: str
+    ) -> dict[str, Any] | None:
+        """Try to extract a library item from a renderer dict."""
+        # Extract title
+        title = self._extract_text(obj.get("title"))
+        if not title:
+            title = self._extract_text(obj.get("header"))
+        if not title:
+            return None
+
+        # Extract ID from navigation endpoints
+        item_id = None
+        nav = obj.get("navigationEndpoint") or {}
+        browse_ep = nav.get("browseEndpoint") or {}
+        item_id = browse_ep.get("browseId")
+
+        if not item_id:
+            # Try watchPlaylistEndpoint for playlists
+            watch_ep = nav.get("watchPlaylistEndpoint") or {}
+            item_id = watch_ep.get("playlistId")
+
+        if not item_id:
+            # Search deeper for browseId in overlay/menu endpoints
+            item_id = self._find_browse_id(obj)
+
+        if not item_id:
+            return None
+
+        # Skip non-content items (headers, sections)
+        if item_id.startswith("FE"):
+            return None
+
+        # Extract thumbnail
+        image = ""
+        thumbnails = obj.get("thumbnail") or obj.get("thumbnailRenderer") or {}
+        if isinstance(thumbnails, dict):
+            thumb_list = (
+                thumbnails.get("thumbnails")
+                or thumbnails.get("musicThumbnailRenderer", {}).get("thumbnail", {}).get("thumbnails")
+                or []
+            )
+            if thumb_list and isinstance(thumb_list, list):
+                image = thumb_list[-1].get("url", "")
+
+        if item_type == "album":
+            return {
+                "type": "youtube-music-album",
+                "id": item_id,
+                "title": title,
+                "image": image,
+                "tracks": [],
+            }
+        return {
+            "type": "youtube-music-playlist",
+            "id": item_id,
+            "title": title,
+            "image": image,
+            "owner": "YouTube Music",
+            "tracks": [],
+        }
+
+    @staticmethod
+    def _extract_text(obj: Any) -> str:
+        """Extract text from various InnerTube text formats."""
+        if isinstance(obj, str):
+            return obj.strip()
+        if isinstance(obj, dict):
+            if "simpleText" in obj:
+                return obj["simpleText"].strip()
+            runs = obj.get("runs")
+            if isinstance(runs, list):
+                return "".join(r.get("text", "") for r in runs).strip()
+        return ""
+
+    @staticmethod
+    def _find_browse_id(obj: dict[str, Any]) -> str | None:
+        """Search a dict (non-recursively) for a browseId in known locations."""
+        for key in ("overlay", "menu", "onTap", "onSelectCommand"):
+            child = obj.get(key)
+            if not isinstance(child, dict):
+                continue
+            # Walk one or two levels
+            for v in child.values():
+                if isinstance(v, dict):
+                    bid = v.get("browseEndpoint", {}).get("browseId")
+                    if bid:
+                        return bid
+                    for v2 in v.values():
+                        if isinstance(v2, dict):
+                            bid = v2.get("browseEndpoint", {}).get("browseId")
+                            if bid:
+                                return bid
+        return None
 
     @staticmethod
     def _build_track_id(video_id: str | None, title: str, artists: list[str]) -> str:
@@ -206,66 +432,144 @@ class YouTubeMusicService:
         user_name: str | None = None,
     ) -> dict[str, Any]:
         parsed = self.parse_source(source)
-        client = self.create_client(token)
-
         kind = parsed["kind"]
+
         if kind == "liked":
-            data = client.get_playlist("LM", limit=None)
-            return self.normalize_playlist(
-                data,
-                source_kind="liked",
-                simplified=simplified,
-                user_id=user_id,
-                user_name=user_name,
-            )
+            if not token:
+                raise ValueError("User authentication required for liked songs.")
+            return self._resolve_liked_via_data_api(token, simplified, user_id, user_name)
 
         if kind == "album":
+            client = self._public_client()
             data = client.get_album(parsed["id"])
             return self.normalize_album(parsed["id"], data, simplified=simplified)
 
         if kind == "audio-playlist-album":
+            client = self._public_client()
             browse_id = client.get_album_browse_id(parsed["id"])
             if not browse_id:
                 raise ValueError("Could not resolve the YouTube Music album browse ID.")
-
             data = client.get_album(browse_id)
             return self.normalize_album(browse_id, data, simplified=simplified)
 
-        data = client.get_playlist(parsed["id"], limit=None)
-        return self.normalize_playlist(data, source_kind="playlist", simplified=simplified)
+        # Playlist — try public ytmusicapi first, fall back to Data API v3
+        try:
+            client = self._public_client()
+            data = client.get_playlist(parsed["id"], limit=None)
+            return self.normalize_playlist(data, source_kind="playlist", simplified=simplified)
+        except Exception:
+            if token:
+                return self._resolve_playlist_via_data_api(parsed["id"], token, simplified)
+            raise
+
+    def _resolve_liked_via_data_api(
+        self,
+        token: dict[str, Any],
+        simplified: bool,
+        user_id: str | None,
+        user_name: str | None,
+    ) -> dict[str, Any]:
+        tracks: list[dict[str, Any]] = []
+        if not simplified:
+            tracks = self._get_playlist_tracks_via_data_api("LL", token)
+        return {
+            "type": "youtube-music-liked",
+            "id": f"liked-{user_id}" if user_id else "liked-songs",
+            "title": "Liked Songs",
+            "image": "",
+            "owner": user_name or "YouTube Music",
+            "tracks": tracks,
+        }
+
+    def _resolve_playlist_via_data_api(
+        self,
+        playlist_id: str,
+        token: dict[str, Any],
+        simplified: bool,
+    ) -> dict[str, Any]:
+        items = self._yt_api_get_all_pages(
+            "playlists",
+            {"id": playlist_id, "part": "snippet,contentDetails", "maxResults": "1"},
+            token,
+            max_pages=1,
+        )
+        if not items:
+            raise ValueError(f"Playlist not found: {playlist_id}")
+
+        snippet = items[0].get("snippet", {})
+        image = self._pick_yt_thumbnail(snippet.get("thumbnails", {}))
+        tracks: list[dict[str, Any]] = []
+        if not simplified:
+            tracks = self._get_playlist_tracks_via_data_api(playlist_id, token)
+
+        return {
+            "type": "youtube-music-playlist",
+            "id": playlist_id,
+            "title": snippet.get("title", "Untitled Playlist"),
+            "image": image,
+            "owner": snippet.get("channelTitle", "YouTube Music"),
+            "tracks": tracks,
+        }
+
+    def _get_playlist_tracks_via_data_api(
+        self, playlist_id: str, token: dict[str, Any]
+    ) -> list[dict[str, Any]]:
+        raw_items = self._yt_api_get_all_pages(
+            "playlistItems",
+            {"playlistId": playlist_id, "part": "snippet,contentDetails", "maxResults": "50"},
+            token,
+        )
+        tracks: list[dict[str, Any]] = []
+        for item in raw_items:
+            snippet = item.get("snippet", {})
+            video_id = snippet.get("resourceId", {}).get("videoId")
+            if not video_id:
+                continue
+            channel = snippet.get("videoOwnerChannelTitle", "Unknown")
+            artist = channel.removesuffix(" - Topic")
+            tracks.append({
+                "id": video_id,
+                "title": (snippet.get("title") or "").strip(),
+                "artist": artist,
+                "album": "",
+                "artists": [artist],
+                "album_id": "unknown",
+                "duration_ms": None,
+            })
+        return tracks
+
+    # ------------------------------------------------------------------
+    # Library browsing (manage-users page)
+    # ------------------------------------------------------------------
 
     def get_library_playlists(self, token: dict[str, Any]) -> list[dict[str, Any]]:
-        client = self.create_client(token)
-        playlists = client.get_library_playlists(limit=None) or []
-
+        """List user's playlists via YouTube Data API v3."""
+        raw_items = self._yt_api_get_all_pages(
+            "playlists",
+            {"mine": "true", "part": "snippet,contentDetails", "maxResults": "50"},
+            token,
+        )
         return [
             {
                 "type": "youtube-music-playlist",
-                "id": item.get("playlistId"),
-                "title": item.get("title", "Untitled Playlist"),
-                "image": self._pick_image(item),
-                "owner": "YouTube Music",
+                "id": item["id"],
+                "title": item.get("snippet", {}).get("title", "Untitled Playlist"),
+                "image": self._pick_yt_thumbnail(item.get("snippet", {}).get("thumbnails", {})),
+                "owner": item.get("snippet", {}).get("channelTitle", "YouTube Music"),
                 "tracks": [],
             }
-            for item in playlists
-            if item.get("playlistId")
+            for item in raw_items
+            if item.get("id")
         ]
 
     def get_library_albums(self, token: dict[str, Any]) -> list[dict[str, Any]]:
-        client = self.create_client(token)
-        albums = client.get_library_albums(limit=500) or []
-
-        return [
-            {
-                "type": "youtube-music-album",
-                "id": item.get("browseId"),
-                "title": item.get("title", "Untitled Album"),
-                "image": self._pick_image(item),
-                "tracks": [],
-            }
-            for item in albums
-            if item.get("browseId")
-        ]
+        """List user's saved albums via InnerTube TVHTML5 browse API."""
+        try:
+            data = self._innertube_browse("FEmusic_liked_albums", token)
+            return self._parse_innertube_library_items(data, item_type="album")
+        except Exception as exc:
+            logger.warning("InnerTube album browse failed (falling back to empty): %s", exc)
+            return []
 
     def get_liked_songs_item(
         self,
@@ -273,26 +577,25 @@ class YouTubeMusicService:
         user_id: str | None = None,
         user_name: str | None = None,
     ) -> list[dict[str, Any]]:
-        client = self.create_client(token)
-        account_info = client.get_account_info()
-
-        liked = {
-            "type": "youtube-music-liked",
-            "id": f"liked-{user_id}" if user_id else "liked-songs",
-            "title": "Liked Songs",
-            "image": account_info.get("accountPhotoUrl", ""),
-            "owner": user_name or account_info.get("accountName") or "YouTube Music",
-            "tracks": [],
-        }
-        return [liked]
+        """Return a liked-songs placeholder card (no heavy API call needed)."""
+        return [
+            {
+                "type": "youtube-music-liked",
+                "id": f"liked-{user_id}" if user_id else "liked-songs",
+                "title": "Liked Songs",
+                "image": "",
+                "owner": user_name or "YouTube Music",
+                "tracks": [],
+            }
+        ]
 
     def get_track(self, video_id: str, token: dict[str, Any] | None = None) -> dict[str, Any]:
-        client = self.create_client(token)
+        """Get track metadata via public ytmusicapi (no auth needed)."""
+        client = self._public_client()
         watch = client.get_watch_playlist(videoId=video_id, limit=1)
         tracks = watch.get("tracks") or []
         if not tracks:
             raise ValueError(f"Track not found for video ID {video_id}")
-
         return self.normalize_track(tracks[0])
 
     @staticmethod
