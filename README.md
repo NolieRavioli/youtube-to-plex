@@ -25,9 +25,17 @@ The redirect URI must exactly match the value configured in Google Cloud. For lo
 http://127.0.0.1:9030/api/youtube-music/token
 ```
 
+If you access the app remotely through a domain, use your public HTTPS callback instead, for example:
+
+```text
+https://music.example.com/api/youtube-music/token
+```
+
 ## Docker
 
 ```bash
+docker build -t youtube-to-plex:latest .
+
 docker run -d \
   --name youtube-music-to-plex \
   -p 9030:9030 \
@@ -36,10 +44,12 @@ docker run -d \
   -e GOOGLE_OAUTH_CLIENT_SECRET=YOUR_CLIENT_SECRET \
   -e GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:9030/api/youtube-music/token \
   -e ENCRYPTION_KEY=YOUR_64_CHAR_HEX_KEY \
-  your-image-name
+  youtube-to-plex:latest
 ```
 
 Then open `http://localhost:9030`.
+
+If you prefer Docker Compose, a versioned example is included at `docker-compose.example.yml` and uses the same local `youtube-to-plex:latest` image tag.
 
 ## Environment
 

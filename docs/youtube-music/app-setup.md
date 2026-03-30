@@ -24,6 +24,24 @@ Recommended local redirect URI:
 http://127.0.0.1:9030/api/youtube-music/token
 ```
 
+For remote access through a domain, use your public HTTPS callback instead, for example:
+
+```text
+https://music.example.com/api/youtube-music/token
+```
+
+Recommended local javascript origin:
+
+```
+http://127.0.0.1:9030
+```
+
+For remote access through a domain, the JavaScript origin should match your public HTTPS origin, for example:
+
+```text
+https://music.example.com
+```
+
 ---
 
 ## Environment Variables
@@ -35,6 +53,8 @@ Add these to your Docker environment:
 -e GOOGLE_OAUTH_CLIENT_SECRET=your_client_secret_here
 -e GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:9030/api/youtube-music/token
 ```
+
+For remote access, replace the redirect URI with your public HTTPS domain, for example `https://music.example.com/api/youtube-music/token`.
 
 {: .important }
 The redirect URI in Google Cloud must exactly match `GOOGLE_OAUTH_REDIRECT_URI`.

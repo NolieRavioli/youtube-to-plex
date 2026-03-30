@@ -1,0 +1,31 @@
+services:
+    youtube-to-plex:
+        # Build this image locally first:
+        # docker build -t youtube-to-plex:latest .
+        image: youtube-to-plex:latest
+        container_name: youtube-to-plex
+        restart: unless-stopped
+        ports:
+            - "9030:9030"
+        volumes:
+            # Replace this with a persistent host directory for app data.
+            - /path/to/youtube-to-plex/config:/app/config
+        environment:
+            PORT: "9030"
+            GOOGLE_OAUTH_CLIENT_ID: your_google_oauth_client_id
+            GOOGLE_OAUTH_CLIENT_SECRET: your_google_oauth_client_secret
+            # For remote access through a domain, use your public HTTPS callback instead.
+            # Example: https://music.example.com/api/youtube-music/token
+            GOOGLE_OAUTH_REDIRECT_URI: http://127.0.0.1:9030/api/youtube-music/token
+            ENCRYPTION_KEY: your_64_character_hex_key
+            PLEX_APP_ID: eXf+f9ktw3CZ8i45OY468WxriOCtoFxuNPzVeDcAwfw=
+
+            # Optional integrations
+            # TIDAL_API_CLIENT_ID: your_tidal_client_id
+            # TIDAL_API_CLIENT_SECRET: your_tidal_client_secret
+            # LIDARR_API_KEY: your_lidarr_api_key
+            # SLSKD_API_KEY: your_slskd_api_key
+            # MQTT_BROKER_URL: mqtt://your-broker:1883
+            # MQTT_USERNAME: your_mqtt_username
+            # MQTT_PASSWORD: your_mqtt_password
+            # MQTT_TOPIC_PREFIX: youtube_music_to_plex

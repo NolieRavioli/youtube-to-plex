@@ -37,6 +37,38 @@ function renderAuthErrorPage(title: string, message: string) {
 </html>`;
 }
 
+function getAuthErrorMessage(error: unknown) {
+    if (axios.isAxiosError(error)) {
+        const responseData = error.response?.data;
+
+        if (typeof responseData === 'string' && responseData.trim())
+            return responseData;
+
+        if (responseData && typeof responseData === 'object') {
+            const data = responseData as Record<string, unknown>;
+            const errorDescription = data.error_description;
+            const errorCode = data.error;
+
+            if (typeof errorDescription === 'string' && errorDescription.trim())
+                return errorDescription;
+
+            if (typeof errorCode === 'string' && errorCode.trim())
+                return errorCode;
+        }
+
+        if (typeof error.message === 'string' && error.message.trim())
+            return error.message;
+    }
+
+    if (error instanceof Error && error.message.trim())
+        return error.message;
+
+    if (typeof error === 'string' && error.trim())
+        return error;
+
+    return 'Authentication failed while exchanging the Google authorization code.';
+}
+
 function getCookie(req: NextApiRequest, name: string) {
     const cookieHeader = req.headers.cookie;
     if (!cookieHeader)
@@ -191,12 +223,8 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                 return res.redirect('/manage-users');
             } catch (error) {
                 clearStateCookie(res);
-                const message = axios.isAxiosError(error)
-                    ? (error.response?.data?.error_description || error.response?.data?.error || error.message)
-                    : 'Authentication failed while exchanging the Google authorization code.';
-
                 res.setHeader('Content-Type', 'text/html');
-                return res.status(400).send(renderAuthErrorPage('Authentication Failed', String(message)));
+                return res.status(400).send(renderAuthErrorPage('Authentication Failed', getAuthErrorMessage(error)));
             }
         }
     );

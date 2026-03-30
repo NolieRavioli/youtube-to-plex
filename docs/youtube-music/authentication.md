@@ -18,6 +18,12 @@ Use a direct callback to the app:
 http://127.0.0.1:9030/api/youtube-music/token
 ```
 
+If you connect to the app remotely through a domain, use your public HTTPS callback instead, for example:
+
+```text
+https://music.example.com/api/youtube-music/token
+```
+
 Flow summary:
 
 1. The browser is sent to Google's consent screen
@@ -33,6 +39,12 @@ Flow summary:
 
 ```sh
 GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:9030/api/youtube-music/token
+```
+
+For remote access through a domain, use:
+
+```sh
+GOOGLE_OAUTH_REDIRECT_URI=https://music.example.com/api/youtube-music/token
 ```
 
 ### Step 2: Register the Same URI in Google Cloud
@@ -65,6 +77,7 @@ The final code exchange should still happen on the server, not in the relay page
 
 - Check that `GOOGLE_OAUTH_REDIRECT_URI` exactly matches the URI registered in Google Cloud
 - Check for trailing slashes or hostname mismatches
+- If you access the app remotely, do not leave this set to `127.0.0.1`; use your public domain instead
 
 ### No Refresh Token Saved
 

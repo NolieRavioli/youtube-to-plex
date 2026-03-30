@@ -29,6 +29,12 @@ Recommended local redirect URI:
 http://127.0.0.1:9030/api/youtube-music/token
 ```
 
+If you connect remotely through a domain name or reverse proxy, use your public HTTPS URL instead, for example:
+
+```text
+https://music.example.com/api/youtube-music/token
+```
+
 See the [YouTube Music setup](youtube-music/) section for the full OAuth flow.
 
 ### 3. Tidal API Credentials (optional)
@@ -52,7 +58,7 @@ For peer-to-peer downloads from Soulseek:
 ## Docker Installation
 
 ```sh
-docker build -t youtube-music-to-plex .
+docker build -t youtube-to-plex:latest .
 
 docker run -d \
     --name=youtube-music-to-plex \
@@ -64,11 +70,14 @@ docker run -d \
     -e GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:9030/api/youtube-music/token \
     -e ENCRYPTION_KEY=YOUR_ENCRYPTION_KEY \
     -e PLEX_APP_ID=eXf+f9ktw3CZ8i45OY468WxriOCtoFxuNPzVeDcAwfw= \
-    youtube-music-to-plex
+    youtube-to-plex:latest
 ```
 
 {: .note }
 All persistent data is stored in `/app/config`.
+
+{: .note }
+If you access the app remotely, replace the loopback redirect URI with your public HTTPS domain, for example `https://music.example.com/api/youtube-music/token`, and register that exact same URI in Google Cloud.
 
 ### Optional Environment Variables
 
@@ -82,25 +91,35 @@ All persistent data is stored in `/app/config`.
 
 ---
 
-## Docker Compose / Portainer
+## Docker Compose
+
+A ready-to-edit example is included at the repository root as `docker-compose.example.yml`.
+Build the image locally first, then copy it to `docker-compose.yml`, replace the placeholder values, and start it with `docker compose up -d`.
+
+```sh
+docker build -t youtube-to-plex:latest .
+docker compose up -d
+```
+
+If Docker prints `docker.io/library/youtube-to-plex:latest` at the end of the build, that is still the same local `youtube-to-plex:latest` image tag.
 
 ```yaml
 services:
-  youtube-music-to-plex:
-    container_name: youtube-music-to-plex
+  youtube-to-plex:
+    image: youtube-to-plex:latest
+    container_name: youtube-to-plex
     restart: unless-stopped
-    build: .
     ports:
       - "9030:9030"
     volumes:
-      - /local/directory:/app/config
+      - /path/to/youtube-to-plex/config:/app/config
     environment:
-      - PORT=9030
-      - GOOGLE_OAUTH_CLIENT_ID=YOUR_CLIENT_ID
-      - GOOGLE_OAUTH_CLIENT_SECRET=YOUR_CLIENT_SECRET
-      - GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:9030/api/youtube-music/token
-      - ENCRYPTION_KEY=YOUR_ENCRYPTION_KEY
-      - PLEX_APP_ID=eXf+f9ktw3CZ8i45OY468WxriOCtoFxuNPzVeDcAwfw=
+      PORT: "9030"
+      GOOGLE_OAUTH_CLIENT_ID: YOUR_CLIENT_ID
+      GOOGLE_OAUTH_CLIENT_SECRET: YOUR_CLIENT_SECRET
+      GOOGLE_OAUTH_REDIRECT_URI: http://127.0.0.1:9030/api/youtube-music/token
+      ENCRYPTION_KEY: YOUR_ENCRYPTION_KEY
+      PLEX_APP_ID: eXf+f9ktw3CZ8i45OY468WxriOCtoFxuNPzVeDcAwfw=
 ```
 
 ---
@@ -111,6 +130,12 @@ Google requires exact redirect URI matching. The simplest setup is a direct loop
 
 ```text
 http://127.0.0.1:9030/api/youtube-music/token
+```
+
+For remote access through a domain, use your public HTTPS callback instead:
+
+```text
+https://music.example.com/api/youtube-music/token
 ```
 
 If you need a relay page for a LAN deployment, publish the repository's `docs/callback.html` file on an HTTPS origin you control and register that exact URL in Google Cloud.
