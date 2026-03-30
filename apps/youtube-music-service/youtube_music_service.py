@@ -554,10 +554,20 @@ class YouTubeMusicService:
             data = client.get_album(browse_id)
             return self.normalize_album(browse_id, data, simplified=simplified)
 
-        # Playlist — try public ytmusicapi first, fall back to Data API v3
+        # Playlist
+        # When simplified=True (UI "save item" flow), we only need title/image/owner — no tracks.
+        # Use limit=1 so ytmusicapi makes a single request instead of paginating through all songs.
+        # When simplified=False and a token is available, prefer the Data API v3 path, which
+        # paginates efficiently and avoids ytmusicapi timing out on large playlists (e.g. 5000 songs).
+        if not simplified and token:
+            logger.info("resolve_source: playlist simplified=False + token → using Data API v3")
+            return self._resolve_playlist_via_data_api(parsed["id"], token, simplified)
+
+        fetch_limit = 1 if simplified else None
+        logger.info("resolve_source: playlist fetch_limit=%s simplified=%s", fetch_limit, simplified)
         try:
             client = self._public_client()
-            data = client.get_playlist(parsed["id"], limit=None)
+            data = client.get_playlist(parsed["id"], limit=fetch_limit)
             return self.normalize_playlist(data, source_kind="playlist", simplified=simplified)
         except Exception:
             if token:
@@ -623,6 +633,7 @@ class YouTubeMusicService:
             "playlistItems",
             {"playlistId": playlist_id, "part": "snippet,contentDetails", "maxResults": "50"},
             token,
+            max_pages=200,  # supports up to 10,000 tracks (200 × 50)
         )
         tracks: list[dict[str, Any]] = []
         skipped = 0
