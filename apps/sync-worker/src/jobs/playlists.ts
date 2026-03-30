@@ -25,6 +25,7 @@ import { putPlexPlaylist } from "../utils/putPlexTracks";
 import { getSettings } from "@youtube-to-plex/plex-config/functions/getSettings";
 import { LidarrAlbumData } from "@youtube-to-plex/shared-types/lidarr/LidarrAlbumData";
 import { SlskdTrackData } from "@youtube-to-plex/shared-types/slskd/SlskdTrackData";
+import { enrichTrackWithMusicBrainz } from "@youtube-to-plex/shared-utils/musicbrainz/enrichTrackWithMusicBrainz";
 
 
 export async function syncPlaylists() {
@@ -136,6 +137,33 @@ export async function syncPlaylists() {
                     result = result.concat(searchResult)
 
                     add(searchResult, 'plex')
+                }
+
+                // MusicBrainz enrichment: retry unmatched tracks with canonical metadata
+                const unmatchedSearch = (result as SearchResponse[]).filter(r =>
+                    toSearchItems.some(t => t.id === r.id) && r.result.length === 0
+                );
+                if (unmatchedSearch.length > 0) {
+                    const unmatchedTracks = toSearchItems.filter(t =>
+                        unmatchedSearch.some(r => r.id === t.id)
+                    );
+                    const enrichedTracks = await Promise.all(unmatchedTracks.map(t => enrichTrackWithMusicBrainz(t)));
+                    const changedTracks = enrichedTracks.filter((t, i) =>
+                        t.title !== unmatchedTracks[i]!.title || t.artists[0] !== unmatchedTracks[i]!.artists[0]
+                    );
+                    if (changedTracks.length > 0) {
+                        console.log(`MusicBrainz: enriched ${changedTracks.length} unmatched track(s), re-searching…`);
+                        const mbResult = await plexMusicSearch(plexSearchConfig, changedTracks);
+                        for (const mr of mbResult) {
+                            if (mr.result.length > 0) {
+                                const idx = (result as SearchResponse[]).findIndex(r => r.id === mr.id);
+                                if (idx > -1) {
+                                    (result as SearchResponse[])[idx] = mr;
+                                    add([mr], 'plex');
+                                }
+                            }
+                        }
+                    }
                 }
 
                 ////////////

@@ -6,6 +6,12 @@ export type MusicBrainzUrlResponse = {
         'type-id': string;
         direction: string;
         'target-type': string;
+        recording?: {
+            id: string;
+            title: string;
+            length?: number;
+            disambiguation?: string;
+        };
         release?: {
             id: string;
             title: string;
