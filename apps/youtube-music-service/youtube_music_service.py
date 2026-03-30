@@ -12,6 +12,7 @@ use ytmusicapi which works fine without OAuth.
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import time
@@ -61,18 +62,28 @@ class YouTubeMusicService:
     def _normalize_expires_at(token: dict[str, Any]) -> int:
         """Return expires_at as Unix epoch seconds."""
         raw = int(token.get("expires_at") or 0)
-        return raw // 1000 if raw > 1e12 else raw
+        normalized = raw // 1000 if raw > 1e12 else raw
+        logger.debug("Token expires_at: raw=%s normalized=%s was_ms=%s", raw, normalized, raw > 1e12)
+        return normalized
 
     def _ensure_fresh_token(self, token: dict[str, Any]) -> str:
         """Return a valid access_token, refreshing if it is about to expire."""
         expires_at = self._normalize_expires_at(token)
-        if expires_at and expires_at - int(time.time()) < 60:
+        now = int(time.time())
+        seconds_remaining = (expires_at - now) if expires_at else 0
+        logger.debug("Token freshness check: expires_at=%s now=%s seconds_remaining=%s", expires_at, now, seconds_remaining)
+        if expires_at and seconds_remaining < 60:
+            logger.info("Token expires in %ss — refreshing before API call", seconds_remaining)
             fresh = self._refresh_token(token["refresh_token"])
+            logger.info("Token refresh complete")
             token["access_token"] = fresh
-        return token.get("access_token", "")
+        access_token = token.get("access_token", "")
+        logger.debug("Using access_token ending in: ...%s", access_token[-8:] if len(access_token) > 8 else "(too short)")
+        return access_token
 
     def _refresh_token(self, refresh_token: str) -> str:
         """Exchange a refresh_token for a new access_token."""
+        logger.info("Posting to Google token endpoint for refresh")
         resp = http_client.post(
             "https://oauth2.googleapis.com/token",
             data={
@@ -83,11 +94,15 @@ class YouTubeMusicService:
             },
             timeout=15,
         )
+        logger.info("Token refresh response: HTTP %s", resp.status_code)
+        if not resp.ok:
+            logger.error("Token refresh failed: HTTP %s body=%s", resp.status_code, resp.text[:500])
         resp.raise_for_status()
         data = resp.json()
         new_token = data.get("access_token")
         if not new_token:
             raise ValueError("Token refresh did not return an access_token.")
+        logger.info("New access_token obtained (ends in ...%s)", new_token[-8:])
         return new_token
 
     # ------------------------------------------------------------------
@@ -96,38 +111,58 @@ class YouTubeMusicService:
 
     def _yt_api_get(self, path: str, params: dict[str, str], token: dict[str, Any]) -> dict[str, Any]:
         access_token = self._ensure_fresh_token(token)
+        url = f"{YT_DATA_API}/{path}"
+        logger.info("YouTube Data API → GET %s params=%s", path, params)
         resp = http_client.get(
-            f"{YT_DATA_API}/{path}",
+            url,
             params=params,
             headers={"Authorization": f"Bearer {access_token}"},
             timeout=30,
         )
+        logger.info("YouTube Data API ← HTTP %s for %s", resp.status_code, path)
         if not resp.ok:
             try:
-                err_msg = resp.json().get("error", {}).get("message", "")
+                err_body = resp.json()
+                err_msg = err_body.get("error", {}).get("message", "")
+                err_reason = (err_body.get("error", {}).get("errors") or [{}])[0].get("reason", "")
+                logger.error("YouTube Data API error: %s (reason=%s) [HTTP %s]", err_msg, err_reason, resp.status_code)
+                if resp.status_code == 403 and "not been used" in err_msg:
+                    logger.error("HINT: YouTube Data API v3 is not enabled in your Google Cloud project.")
+                    logger.error("Enable it at: https://console.cloud.google.com/apis/library/youtube.googleapis.com")
             except Exception:
                 err_msg = ""
+                logger.error("YouTube Data API HTTP %s body: %s", resp.status_code, resp.text[:500])
             raise http_client.exceptions.HTTPError(
                 f"YouTube Data API HTTP {resp.status_code}: {err_msg or resp.text[:300]}",
                 response=resp,
             )
-        return resp.json()
+        data = resp.json()
+        item_count = len(data.get("items") or [])
+        logger.info("YouTube Data API %s: %s item(s) on this page (nextPageToken=%s)",
+                    path, item_count, bool(data.get("nextPageToken")))
+        return data
 
     def _yt_api_get_all_pages(
         self, path: str, base_params: dict[str, str], token: dict[str, Any], max_pages: int = 20
     ) -> list[dict[str, Any]]:
         """Paginate through a YouTube Data API v3 list endpoint."""
+        logger.info("YouTube Data API paginated GET: path=%s max_pages=%s", path, max_pages)
         items: list[dict[str, Any]] = []
         page_token: str | None = None
-        for _ in range(max_pages):
+        for page_num in range(max_pages):
             params = {**base_params}
             if page_token:
                 params["pageToken"] = page_token
+                logger.debug("Fetching page %s for %s", page_num + 1, path)
             data = self._yt_api_get(path, params, token)
-            items.extend(data.get("items") or [])
+            page_items = data.get("items") or []
+            items.extend(page_items)
+            logger.debug("Page %s: +%s items (running total=%s)", page_num + 1, len(page_items), len(items))
             page_token = data.get("nextPageToken")
             if not page_token:
+                logger.debug("No more pages for %s after page %s", path, page_num + 1)
                 break
+        logger.info("YouTube Data API %s complete: %s total item(s)", path, len(items))
         return items
 
     # ------------------------------------------------------------------
@@ -136,10 +171,14 @@ class YouTubeMusicService:
 
     def _innertube_browse(self, browse_id: str, token: dict[str, Any]) -> dict[str, Any]:
         access_token = self._ensure_fresh_token(token)
+        client_name = IOS_MUSIC_CONTEXT["client"]["clientName"]
+        client_version = IOS_MUSIC_CONTEXT["client"]["clientVersion"]
         body = {
             "context": IOS_MUSIC_CONTEXT,
             "browseId": browse_id,
         }
+        logger.info("InnerTube browse → POST browseId=%s client=%s/%s", browse_id, client_name, client_version)
+        logger.debug("InnerTube request body: %s", json.dumps(body))
         resp = http_client.post(
             f"{INNERTUBE_API}/browse",
             json=body,
@@ -151,16 +190,30 @@ class YouTubeMusicService:
             },
             timeout=30,
         )
+        logger.info("InnerTube browse ← HTTP %s for browseId=%s", resp.status_code, browse_id)
         if not resp.ok:
             try:
-                err_msg = resp.json().get("error", {}).get("message", "")
+                err_body = resp.json()
+                err_msg = err_body.get("error", {}).get("message", "")
+                err_status = err_body.get("error", {}).get("status", "")
+                logger.error("InnerTube browse FAILED: browseId=%s HTTP %s status=%s error=%s",
+                             browse_id, resp.status_code, err_status, err_msg)
             except Exception:
                 err_msg = ""
+                logger.error("InnerTube browse FAILED: browseId=%s HTTP %s body=%s",
+                             browse_id, resp.status_code, resp.text[:500])
+            logger.debug("InnerTube full error response: %s", resp.text[:2000])
             raise http_client.exceptions.HTTPError(
                 f"InnerTube browse HTTP {resp.status_code} for {browse_id}: {err_msg or resp.text[:300]}",
                 response=resp,
             )
-        return resp.json()
+        data = resp.json()
+        top_keys = list(data.keys())
+        logger.info("InnerTube browse OK: browseId=%s top-level keys=%s", browse_id, top_keys)
+        if "contents" in data and isinstance(data["contents"], dict):
+            logger.debug("InnerTube response.contents keys: %s", list(data["contents"].keys()))
+        logger.debug("InnerTube response body (first 3000 chars):\n%s", resp.text[:3000])
+        return data
 
     # ------------------------------------------------------------------
     # Non-auth ytmusicapi client (public content only)
@@ -201,9 +254,21 @@ class YouTubeMusicService:
     def _parse_innertube_library_items(
         self, data: dict[str, Any], item_type: str = "album"
     ) -> list[dict[str, Any]]:
-        """Walk InnerTube TVHTML5 browse response to extract library items."""
+        """Walk InnerTube IOS_MUSIC browse response to extract library items."""
+        logger.info("Parsing InnerTube response for item_type=%s", item_type)
+        logger.debug("Response top-level keys: %s", list(data.keys()))
+        if "contents" in data:
+            contents = data["contents"]
+            if isinstance(contents, dict):
+                logger.debug("response.contents keys: %s", list(contents.keys()))
+                # Log the renderer type so we can see if it's singleColumn vs twoColumn
+                for key in ("singleColumnBrowseResultsRenderer", "twoColumnBrowseResultsRenderer",
+                            "sectionListRenderer", "musicShelfRenderer"):
+                    if key in contents:
+                        logger.info("InnerTube response format: contents.%s", key)
         results: list[dict[str, Any]] = []
         self._walk_innertube_tree(data, results, item_type)
+        logger.info("InnerTube tree walk found %s raw candidate(s) for item_type=%s", len(results), item_type)
 
         # Deduplicate by ID
         seen: set[str] = set()
@@ -212,6 +277,11 @@ class YouTubeMusicService:
             if item["id"] and item["id"] not in seen:
                 seen.add(item["id"])
                 deduped.append(item)
+        logger.info("InnerTube parse complete: %s unique %s(s) after dedup", len(deduped), item_type)
+        for i, item in enumerate(deduped[:10]):
+            logger.info("  [%s] id=%s title=%r", i + 1, item.get("id"), item.get("title"))
+        if len(deduped) > 10:
+            logger.info("  ... and %s more", len(deduped) - 10)
         return deduped
 
     def _walk_innertube_tree(
@@ -460,8 +530,11 @@ class YouTubeMusicService:
         user_id: str | None = None,
         user_name: str | None = None,
     ) -> dict[str, Any]:
+        logger.info("resolve_source: source=%r simplified=%s has_token=%s",
+                    source[:80] if len(source) > 80 else source, simplified, token is not None)
         parsed = self.parse_source(source)
         kind = parsed["kind"]
+        logger.info("resolve_source: kind=%s id=%s", kind, parsed.get("id", "(none)"))
 
         if kind == "liked":
             if not token:
@@ -498,9 +571,11 @@ class YouTubeMusicService:
         user_id: str | None,
         user_name: str | None,
     ) -> dict[str, Any]:
+        logger.info("_resolve_liked_via_data_api: simplified=%s user_id=%s", simplified, user_id)
         tracks: list[dict[str, Any]] = []
         if not simplified:
             tracks = self._get_playlist_tracks_via_data_api("LL", token)
+        logger.info("_resolve_liked_via_data_api: returning %s track(s)", len(tracks))
         return {
             "type": "youtube-music-liked",
             "id": f"liked-{user_id}" if user_id else "liked-songs",
@@ -543,16 +618,19 @@ class YouTubeMusicService:
     def _get_playlist_tracks_via_data_api(
         self, playlist_id: str, token: dict[str, Any]
     ) -> list[dict[str, Any]]:
+        logger.info("_get_playlist_tracks_via_data_api: playlist_id=%s", playlist_id)
         raw_items = self._yt_api_get_all_pages(
             "playlistItems",
             {"playlistId": playlist_id, "part": "snippet,contentDetails", "maxResults": "50"},
             token,
         )
         tracks: list[dict[str, Any]] = []
+        skipped = 0
         for item in raw_items:
             snippet = item.get("snippet", {})
             video_id = snippet.get("resourceId", {}).get("videoId")
             if not video_id:
+                skipped += 1
                 continue
             channel = snippet.get("videoOwnerChannelTitle", "Unknown")
             artist = channel.removesuffix(" - Topic")
@@ -565,6 +643,8 @@ class YouTubeMusicService:
                 "album_id": "unknown",
                 "duration_ms": None,
             })
+        logger.info("_get_playlist_tracks_via_data_api: %s track(s) parsed, %s skipped (no videoId)",
+                    len(tracks), skipped)
         return tracks
 
     # ------------------------------------------------------------------
@@ -572,18 +652,66 @@ class YouTubeMusicService:
     # ------------------------------------------------------------------
 
     def get_library_playlists(self, token: dict[str, Any]) -> list[dict[str, Any]]:
-        """List user's YouTube Music playlists via InnerTube IOS_MUSIC browse.
+        """List user's YouTube Music playlists.
 
-        Uses InnerTube instead of the YouTube Data API v3 so the caller does not
-        need to enable the Data API in their Google Cloud project.
+        Tries InnerTube IOS_MUSIC first (FEmusic_liked_playlists).
+        Falls back to YouTube Data API v3 playlists?mine=true if InnerTube returns
+        an error or zero items — the Data API requires YouTube Data API v3 to be
+        enabled in the Google Cloud project that owns the OAuth client.
         """
-        data = self._innertube_browse("FEmusic_liked_playlists", token)
-        return self._parse_innertube_library_items(data, item_type="playlist")
+        logger.info("get_library_playlists: trying InnerTube FEmusic_liked_playlists")
+        try:
+            data = self._innertube_browse("FEmusic_liked_playlists", token)
+            items = self._parse_innertube_library_items(data, item_type="playlist")
+            logger.info("get_library_playlists: InnerTube returned %s playlist(s)", len(items))
+            if items:
+                return items
+            logger.warning(
+                "get_library_playlists: InnerTube returned 0 items — "
+                "falling back to YouTube Data API v3"
+            )
+        except Exception as exc:
+            logger.warning(
+                "get_library_playlists: InnerTube failed (%s: %s) — "
+                "falling back to YouTube Data API v3 (playlists?mine=true)",
+                type(exc).__name__, exc,
+            )
+        return self._get_library_playlists_via_data_api(token)
+
+    def _get_library_playlists_via_data_api(self, token: dict[str, Any]) -> list[dict[str, Any]]:
+        """Fallback: list user-owned playlists via YouTube Data API v3.
+
+        Requires the YouTube Data API v3 to be enabled in the Google Cloud project:
+        https://console.cloud.google.com/apis/library/youtube.googleapis.com
+        """
+        logger.info("_get_library_playlists_via_data_api: calling playlists?mine=true")
+        raw_items = self._yt_api_get_all_pages(
+            "playlists",
+            {"mine": "true", "part": "snippet,contentDetails", "maxResults": "50"},
+            token,
+        )
+        result = [
+            {
+                "type": "youtube-music-playlist",
+                "id": item["id"],
+                "title": item.get("snippet", {}).get("title", "Untitled Playlist"),
+                "image": self._pick_yt_thumbnail(item.get("snippet", {}).get("thumbnails", {})),
+                "owner": item.get("snippet", {}).get("channelTitle", "YouTube Music"),
+                "tracks": [],
+            }
+            for item in raw_items
+            if item.get("id")
+        ]
+        logger.info("_get_library_playlists_via_data_api: returning %s playlist(s)", len(result))
+        return result
 
     def get_library_albums(self, token: dict[str, Any]) -> list[dict[str, Any]]:
         """List user's saved albums via InnerTube IOS_MUSIC browse."""
+        logger.info("get_library_albums: browsing FEmusic_liked_albums")
         data = self._innertube_browse("FEmusic_liked_albums", token)
-        return self._parse_innertube_library_items(data, item_type="album")
+        items = self._parse_innertube_library_items(data, item_type="album")
+        logger.info("get_library_albums: returning %s album(s)", len(items))
+        return items
 
     def get_liked_songs_item(
         self,
@@ -592,6 +720,7 @@ class YouTubeMusicService:
         user_name: str | None = None,
     ) -> list[dict[str, Any]]:
         """Return a liked-songs placeholder card (no heavy API call needed)."""
+        logger.info("get_liked_songs_item: user_id=%s user_name=%s", user_id, user_name)
         return [
             {
                 "type": "youtube-music-liked",
@@ -605,12 +734,15 @@ class YouTubeMusicService:
 
     def get_track(self, video_id: str, token: dict[str, Any] | None = None) -> dict[str, Any]:
         """Get track metadata via public ytmusicapi (no auth needed)."""
+        logger.info("get_track: video_id=%s", video_id)
         client = self._public_client()
         watch = client.get_watch_playlist(videoId=video_id, limit=1)
         tracks = watch.get("tracks") or []
         if not tracks:
             raise ValueError(f"Track not found for video ID {video_id}")
-        return self.normalize_track(tracks[0])
+        result = self.normalize_track(tracks[0])
+        logger.info("get_track: found title=%r artist=%r", result.get("title"), result.get("artist"))
+        return result
 
     @staticmethod
     def parse_source(source: str) -> dict[str, str]:
