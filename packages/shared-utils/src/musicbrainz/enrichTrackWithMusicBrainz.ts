@@ -2,6 +2,7 @@ import { Track } from '@youtube-to-plex/shared-types/youtube-music/Track';
 import { getMusicBrainzTrackCache } from './getMusicBrainzTrackCache';
 import { getMusicBrainzRecordingByYouTubeId } from './getMusicBrainzRecordingByYouTubeId';
 import { getMusicBrainzRecordingBySearch } from './getMusicBrainzRecordingBySearch';
+import { getMusicBrainzCache } from '../cache/getMusicBrainzCache';
 
 /**
  * Attempt to enrich a YouTube Music track with canonical MusicBrainz metadata.
@@ -60,6 +61,20 @@ export async function enrichTrackWithMusicBrainz(track: Track): Promise<Track> {
         canonical_title: result.title,
         canonical_artist: result.artist,
     });
+
+    // When the video ID lookup returned a release-group ID, pre-populate the MB
+    // album cache so the Lidarr sync job gets a guaranteed cache hit and never
+    // has to fall back to an unreliable artist+album name text search.
+    if (result.releaseGroupId && track.album_id && track.album_id !== 'unknown') {
+        const albumCache = getMusicBrainzCache();
+        if (!albumCache.get(track.album_id)) {
+            albumCache.add({
+                source_album_id: track.album_id,
+                musicbrainz_release_group_id: result.releaseGroupId,
+                musicbrainz_artist_id: result.artistId ?? '',
+            });
+        }
+    }
 
     return {
         ...track,

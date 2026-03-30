@@ -584,7 +584,7 @@ class YouTubeMusicService:
         logger.info("_resolve_liked_via_data_api: simplified=%s user_id=%s", simplified, user_id)
         tracks: list[dict[str, Any]] = []
         if not simplified:
-            tracks = self._get_playlist_tracks_via_data_api("LL", token)
+            tracks = self._get_playlist_tracks_via_data_api("LL", token, music_only=True)
         logger.info("_resolve_liked_via_data_api: returning %s track(s)", len(tracks))
         return {
             "type": "youtube-music-liked",
@@ -625,10 +625,31 @@ class YouTubeMusicService:
             "tracks": tracks,
         }
 
+    def _get_video_categories(self, video_ids: list[str], token: dict[str, Any]) -> dict[str, str]:
+        """Batch-fetch categoryId for a list of video IDs via the videos endpoint.
+
+        Returns a mapping of {video_id: category_id}.
+        Results are fetched in batches of 50 (YouTube API limit).
+        """
+        categories: dict[str, str] = {}
+        for i in range(0, len(video_ids), 50):
+            batch = video_ids[i:i + 50]
+            data = self._yt_api_get(
+                "videos",
+                {"id": ",".join(batch), "part": "snippet"},
+                token,
+            )
+            for item in data.get("items") or []:
+                vid = item.get("id")
+                cat = item.get("snippet", {}).get("categoryId", "")
+                if vid:
+                    categories[vid] = cat
+        return categories
+
     def _get_playlist_tracks_via_data_api(
-        self, playlist_id: str, token: dict[str, Any]
+        self, playlist_id: str, token: dict[str, Any], music_only: bool = False
     ) -> list[dict[str, Any]]:
-        logger.info("_get_playlist_tracks_via_data_api: playlist_id=%s", playlist_id)
+        logger.info("_get_playlist_tracks_via_data_api: playlist_id=%s music_only=%s", playlist_id, music_only)
         raw_items = self._yt_api_get_all_pages(
             "playlistItems",
             {"playlistId": playlist_id, "part": "snippet,contentDetails", "maxResults": "50"},
@@ -654,6 +675,18 @@ class YouTubeMusicService:
                 "album_id": "unknown",
                 "duration_ms": None,
             })
+
+        if music_only and tracks:
+            # YouTube category 10 = Music. Filter out non-music videos (vlogs, podcasts, etc.)
+            video_ids = [t["id"] for t in tracks]
+            categories = self._get_video_categories(video_ids, token)
+            before = len(tracks)
+            tracks = [t for t in tracks if categories.get(t["id"]) == "10"]
+            logger.info(
+                "_get_playlist_tracks_via_data_api: music filter: %s → %s track(s) (%s non-music removed)",
+                before, len(tracks), before - len(tracks),
+            )
+
         logger.info("_get_playlist_tracks_via_data_api: %s track(s) parsed, %s skipped (no videoId)",
                     len(tracks), skipped)
         return tracks

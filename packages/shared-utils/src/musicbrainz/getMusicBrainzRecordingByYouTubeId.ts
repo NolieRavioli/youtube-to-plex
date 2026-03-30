@@ -11,6 +11,9 @@ export type MusicBrainzRecordingResult = {
     mbid: string;
     title: string;
     artist: string;
+    artistId?: string;
+    /** MusicBrainz release-group ID — used to drive Lidarr lookups directly */
+    releaseGroupId?: string;
 };
 
 /**
@@ -39,21 +42,36 @@ export async function getMusicBrainzRecordingByYouTubeId(videoId: string): Promi
 
         const mbid = recordingRelation.recording.id;
 
-        // Step 2: Full recording lookup for canonical title + artist
+        // Step 2: Full recording lookup for canonical title, artist, and release group
+        // inc=releases+release-groups lets us extract the release-group ID which Lidarr needs
         await rateLimitDelay();
         const recordingResponse = await withRetry(() =>
             axios.get<MusicBrainzRecording>(
-                `${MB_API}/recording/${mbid}?fmt=json&inc=artist-credits`,
+                `${MB_API}/recording/${mbid}?fmt=json&inc=artist-credits+releases+release-groups`,
                 { headers: { 'User-Agent': USER_AGENT } }
             )
         );
 
         const recording = recordingResponse.data;
-        const artist = recording['artist-credit']?.[0]?.artist?.name;
+        const artistCredit = recording['artist-credit']?.[0];
+        const artist = artistCredit?.artist?.name;
         if (!artist)
             return null;
 
-        return { mbid, title: recording.title, artist };
+        // Pick the release-group ID from the first official release, preferring albums
+        const releases = recording.releases ?? [];
+        const preferredRelease =
+            releases.find(r => r['release-group']?.['primary-type'] === 'Album') ??
+            releases[0];
+        const releaseGroupId = preferredRelease?.['release-group']?.id;
+
+        return {
+            mbid,
+            title: recording.title,
+            artist,
+            artistId: artistCredit?.artist?.id,
+            releaseGroupId,
+        };
     } catch (_e) {
         return null;
     }
